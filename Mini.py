@@ -1,6 +1,8 @@
-import SQL
-import pymysql
 from datetime import datetime, timedelta
+
+import pymysql
+
+import SQL
 
 
 def get_recent_minigame():
@@ -14,11 +16,17 @@ def get_recent_minigame():
         curs.execute(query)
         rows = curs.fetchall()
 
+        if len(rows) == 0:
+            curs = conn.cursor(pymysql.cursors.DictCursor)
+            query = "SELECT * FROM MiniGameTimeTable ORDER BY `Time` ASC"
+            curs.execute(query)
+            rows = curs.fetchall()
+
         minigame_list = []
 
         # Game1: 0: OX, 1: 크레이지 러너즈, 2: 댄댄
         if str(rows[0]['Game1']) == "0":
-           minigame_list.append("OX 퀴즈쇼")
+            minigame_list.append("OX 퀴즈쇼")
 
         if str(rows[0]['Game1']) == "1":
             minigame_list.append("크레이지 러너즈")
