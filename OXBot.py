@@ -1,14 +1,16 @@
-import discord
 import random
-import time
 import re
-import get_ranking
+import time
 import urllib.request
 
+import discord
+
+import Mini
+import get_ranking
+import get_tts_mp3
 # 별도 파일
 import inner_query
-import Mini
-import get_tts_mp3
+
 
 # 메콩OX봇#5381
 
