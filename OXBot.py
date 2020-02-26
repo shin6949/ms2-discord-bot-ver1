@@ -5,10 +5,10 @@ import urllib.request
 
 import discord
 
+# 별도 파일
 import Mini
 import get_ranking
 import get_tts_mp3
-# 별도 파일
 import inner_query
 
 
@@ -209,7 +209,7 @@ async def on_message(message):
             if len(keyword) < 2:
                 msg = "검색어는 2글자 이상 입력해주세요."
                 await channel.send(msg)
-                inner_query.log_upload(message, "ox", msg)
+                inner_query.log_upload("QueryLog", message.content, message.author)
                 return None
 
             msg = inner_query.get_query_result(keyword, message, start)
@@ -449,6 +449,35 @@ async def on_message(message):
             await voice_list[0].disconnect(force=True)
             await channel.send('나가기 완료', delete_after=10.0)
             return None
+
+    if message.content.startswith("!채팅"):
+        channel = message.channel
+        judge = judge_server(message, channel)
+        if not judge == "True":
+            await channel.send(judge)
+            return None
+
+        keyword = message.content.replace("!채팅", "", 1).replace(" ", "", 1)
+        print(len(keyword))
+        chat_list = inner_query.get_chat(keyword)
+
+        if chat_list == "False":
+            await channel.send("서버 문제로 인해 정보를 찾지 못 했습니다.")
+            return None
+
+        if len(keyword) == 0:
+            msg = "최근 월드, 채널 채팅 내용입니다. (최근 10개)"
+        else:
+            msg = "찾으시는 \'{}\'에 관한 내용입니다. (최근 10개)".format(str(keyword))
+
+        if len(chat_list) == 0:
+            msg += "```열심히 찾아봤지만 데이터가 없네요.```"
+        else:
+            for i in chat_list:
+                msg += i
+
+        await channel.send(msg)
+        return None
 
     if message.content.startswith("!"):
         channel = message.channel
