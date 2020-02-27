@@ -6,6 +6,10 @@ import random
 import public_SQL
 
 
+def too_many_result():
+    return "검색 결과가 30개가 넘어요!\n디스코드 내 최대 글자수 제한이 있어서 결과를 표시 할 수 없습니다. 좀 더 길게 검색해보세요."
+
+
 def log_upload(message, querytype, respond):
     try:
         channel = message.channel.name
@@ -124,6 +128,9 @@ def get_query_result(keyword):
         curs.execute(query)
         rows = curs.fetchall()
 
+        if len(rows) > 30:
+            return too_many_result()
+
         msg = "\"" + keyword + "\"에 대한 검색 결과: " + str(len(rows)) + "개"
         if len(rows) == 0:
             msg += "\n제보는 '!제보'"
@@ -154,6 +161,9 @@ def get_query_result(keyword):
             query = "SELECT num, answer, problem FROM Problem WHERE problem LIKE '%" + keyword + "%' AND addtime < '" + string + "'"
             curs.execute(query)
             rows = curs.fetchall()
+
+            if len(rows) > 30:
+                return too_many_result()
 
             msg = "\"" + keyword + "\"에 대한 검색 결과: " + str(len(rows)) + "개"
             if len(rows) == 0:

@@ -7,6 +7,10 @@ import pymysql
 import SQL
 
 
+def too_many_result():
+    return "검색 결과가 30개가 넘어요!\n디스코드 내 최대 글자수 제한이 있어서 결과를 표시 할 수 없습니다. 좀 더 길게 검색해보세요."
+
+
 def log_upload(table, message, author):
     try:
         conn = SQL.make_connection()
@@ -38,6 +42,9 @@ def get_query_result(keyword, message, start):
         curs.execute(query)
         rows = curs.fetchall()
 
+        if len(rows) > 30:
+            return too_many_result()
+
         msg = "\"" + keyword + "\"에 대한 검색 결과: " + str(len(rows)) + "개"
 
         msg_list = []
@@ -65,6 +72,9 @@ def get_query_result(keyword, message, start):
             query = "SELECT num, answer, problem FROM Problem WHERE problem LIKE '%" + keyword + "%'"
             curs.execute(query)
             rows = curs.fetchall()
+
+            if len(rows) > 30:
+                return too_many_result()
 
             msg = "\"" + keyword + "\"에 대한 검색 결과: " + str(len(rows)) + "개"
 
