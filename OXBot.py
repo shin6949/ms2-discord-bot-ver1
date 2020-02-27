@@ -101,7 +101,7 @@ async def on_message(message):
                 get_tts_mp3.upload_log(message)
                 return None
 
-    if len(client.voice_clients) > 0:
+    if (len(client.voice_clients) > 0) and (not message.content == "!나가기"):
         if get_tts_mp3.get_recent_use():
             channel = message.channel
             voice_list = client.voice_clients
