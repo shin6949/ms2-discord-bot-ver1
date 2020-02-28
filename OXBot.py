@@ -79,7 +79,6 @@ async def on_message(message):
                     current_voiceclient = await voice_channel.connect(timeout=3.0)
                     time.sleep(1)
                 except Exception as d:
-                    print(d)
                     current_voiceclient = client.voice_clients[0]
                     if not str(voice_channel.name) == str(current_voiceclient.channel):
                         await current_voiceclient.disconnect(force=True)
@@ -90,6 +89,7 @@ async def on_message(message):
                     current_voiceclient.play(discord.FFmpegPCMAudio(mp3url))
                     get_tts_mp3.upload_log(message)
                     return None
+
                 except:
                     msg = "먼저 요청한 메시지를 재생하고 있습니다."
                     await channel.send(msg, delete_after=10.0)

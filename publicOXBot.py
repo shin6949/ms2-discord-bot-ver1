@@ -25,7 +25,7 @@ token = "{DISCORD_BOT_TOKEN}"
 @client.event
 async def on_ready():
     print("READY")
-    game = discord.Game("새 기능이 있어요. !설명서")
+    game = discord.Game("!ox로 검색, !설명서")
     await client.change_presence(status=discord.Status.online, activity=game)
 
 
