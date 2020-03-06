@@ -122,15 +122,6 @@ async def on_message(message):
             return None
         else:
             return None
-
-    if not message.content.find("공군") == -1 or not message.content.find("{PRIVATE_GUILD_NAME}") == -1:
-        if message.content.find("공군") > -1:
-            public_query.chat_upload(message, "Keyword:공군")
-            return None
-
-        if message.content.find("{PRIVATE_GUILD_NAME}") > -1:
-            public_query.chat_upload(message, "Keyword:{PRIVATE_GUILD_NAME}")
-            return None
     
 client.run(token)
 
