@@ -108,76 +108,7 @@ async def on_message(message):
         public_query.log_upload(message, "Minigame", msg)
         return None
 
-    # 길드 트로피 순위
-    if message.content == "!길트" or message.content == "!길트 ":
-        if publicJudgeBan.judge(message):
-            return None
-
-        channel = message.channel
-
-        msg = get_ranking.get_guild_ranking("realtime")
-        await channel.send(msg, delete_after=60.0)
-        public_query.log_upload(message, "Ranking", msg)
-        return None
-
-    # 길드 트로피 순위 검색
-    if message.content.startswith("!길트 "):
-        if publicJudgeBan.judge(message):
-            return None
-
-        channel = message.channel
-
-        keyword = message.content.replace("!길트 ", "", 1)
-        guild_list = get_ranking.get_guild_ranking_search_by_keyword("realtime", keyword)
-
-        if str(type(guild_list)) == "<class 'str'>":
-            msg = guild_list
-            await channel.send(msg, delete_after=60.0)
-            public_query.log_upload(message, "Ranking", msg)
-            return None
-
-        urllib.request.urlretrieve(guild_list[0]['imgurl'], guild_list[0]['name'] + ".png")
-        await channel.send(file=discord.File(guild_list[0]['name'] + ".png"))
-
-        msg = guild_list[0]['guildmsg']
-        await channel.send(msg, delete_after=60.0)
-        public_query.log_upload(message, "Ranking", msg)
-        return None
-
-    # 개인 로피 순위
-    if message.content == "!개트" or message.content == "!개트 ":
-        if publicJudgeBan.judge(message):
-            return None
-        channel = message.channel
-
-        msg = get_ranking.get_person_ranking("realtime")
-        await channel.send(msg, delete_after=60.0)
-        public_query.log_upload(message, "Ranking", msg)
-        return None
-
-    # 개인 트로피 순위 검색
-    if message.content.startswith("!개트 "):
-        if publicJudgeBan.judge(message):
-            return None
-        channel = message.channel
-
-        keyword = message.content.replace("!개트 ", "", 1)
-        person_list = get_ranking.get_person_ranking_search_by_keyword("realtime", keyword)
-
-        if str(type(person_list)) == "<class 'str'>":
-            msg = person_list
-            await channel.send(msg, delete_after=60.0)
-            public_query.log_upload(message, "Ranking", msg)
-            return None
-
-        urllib.request.urlretrieve(person_list[0]['imgurl'], person_list[0]['name'] + ".png")
-        await channel.send(file=discord.File(person_list[0]['name'] + ".png"), delete_after=60.0)
-
-        msg = person_list[0]['personmsg']
-        await channel.send(msg, delete_after=60.0)
-        public_query.log_upload(message, "Ranking", msg)
-        return None
-
+    # 커스텀 메시지
     if message.content.startswith("!"):
         if publicJudgeBan.judge(message):
             return None
