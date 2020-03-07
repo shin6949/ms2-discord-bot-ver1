@@ -18,6 +18,7 @@ client = discord.Client()
 # Main Token = "{DISCORD_BOT_TOKEN}"
 token = "{DISCORD_BOT_TOKEN}"
 
+
 # Dev Token
 # token = "{DISCORD_BOT_TOKEN}"
 
@@ -122,6 +123,6 @@ async def on_message(message):
             return None
         else:
             return None
-    
+
 client.run(token)
 

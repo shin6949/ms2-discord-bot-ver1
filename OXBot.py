@@ -11,7 +11,6 @@ import get_ranking
 import get_tts_mp3
 import inner_query
 
-
 # 메콩OX봇#5381
 
 
@@ -160,31 +159,6 @@ async def on_message(message):
         inner_query.log_upload("Other", message.content, message.author)
         return None
 
-    if message.content == "!바보":
-        channel = message.channel
-
-        judge = judge_server(message, channel)
-        if not judge == "True":
-            await channel.send(judge)
-            return None
-
-        msg = ""
-
-        if not str(message.author.id) == "{DEVELOPER_USER_ID}":
-            rand = random.randrange(0, 100) % 3
-            if rand == 0:
-                msg = "<@" + str(message.author.id) + ">님 바보~"
-            if rand == 1:
-                msg = "<@" + str(message.author.id) + ">님 바보~ 메롱~ :P"
-            if rand == 2:
-                msg = "<@" + str(message.author.id) + ">님은 바보인가..?"
-        else:
-            msg = "<@" + str(message.author.id) + ">님은 바보 아님!"
-
-        await channel.send(msg)
-        inner_query.log_upload("Other", message.content, message.author)
-        return None
-
     # OX 퀴즈 검색하기
     if message.content == '!ox' or message.content == '!OX' or message.content == '!퀴즈' or message.content == '!ㅋ' or message.content == '!q':
         channel = message.channel
@@ -204,7 +178,7 @@ async def on_message(message):
         start = time.time()
 
         try:
-            keyword = message.content.replace("!ox ", "", 1).replace("!OX ", "", 1).replace("!퀴즈 ", "", 1).replace("!ㅋ ", "", 1).replace("!q ", "", 1)
+            keyword = message.content.replace("!ox ", "", 1).replace("!OX ", "", 1).replace("!퀴즈 ", "", 1).replace("!ㅋ ", "", 1).replace("!q ", "", 1).lstrip().rstrip()
 
             if len(keyword) < 2:
                 msg = "검색어는 2글자 이상 입력해주세요."
