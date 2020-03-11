@@ -47,6 +47,19 @@ async def on_message(message):
         public_query.log_upload(message, "ox", msg)
         return None
 
+    # OX 저속 언어 필터링
+    if message.content.startswith('!ox 섹스') or message.content.startswith('!OX 섹스'):
+        return None
+
+    if message.content.startswith('!ox 시발') or message.content.startswith('!OX 씨발'):
+        return None
+
+    if message.content.startswith('!ox 교미') or message.content.startswith('!OX 교미'):
+        return None
+
+    if message.content.startswith('!ox 성교') or message.content.startswith('!OX 성교'):
+        return None
+
     # OX 퀴즈 검색하기
     if message.content.startswith('!ox ') or message.content.startswith('!OX '):
         if publicJudgeBan.judge(message):
