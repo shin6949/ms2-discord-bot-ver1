@@ -130,8 +130,7 @@ async def on_message(message):
         inner_query.log_upload("Other", message.content, message.author)
         return None
 
-    # 주사위 기능 (1~100)
-    if message.content == "!주사위" or message.content == "!roll":
+    if message.content.startswith("!연산 "):
         channel = message.channel
 
         judge = judge_server(message, channel)
@@ -139,10 +138,16 @@ async def on_message(message):
             await channel.send(judge)
             return None
 
-        dice_value = str(random.randrange(0, 100))
-        msg = "[" + dice_value + "] 이(가) 나왔습니다!"
+        cal = message.content.replace("!연산 ", "")
+        python_cal = cal.replace("x", "*").replace("X", "*").replace("÷", "/")
+
+        try:
+            msg = '"{}"의 연산 결과\n{}'.format(cal, eval(python_cal))
+        except:
+            msg = '"{}"의 연산 결과\n{}'.format(cal, "올바른 식을 입력하지 않아 계산이 되지 않았습니다.")
+
         await channel.send(msg)
-        inner_query.log_upload("DiceLog", dice_value, message.author)
+        inner_query.log_upload("QueryLog", message.content, message.author)
         return None
 
     # 미니게임 시간표

@@ -60,6 +60,24 @@ async def on_message(message):
     if message.content.startswith('!ox 성교') or message.content.startswith('!OX 성교'):
         return None
 
+    if message.content.startswith("!연산 "):
+        channel = message.channel
+
+        if publicJudgeBan.judge(message):
+            return None
+
+        cal = message.content.replace("!연산 ", "")
+        python_cal = cal.replace("x", "*").replace("X", "*").replace("÷", "/")
+
+        try:
+            msg = '"{}"의 연산 결과\n{}'.format(cal, eval(python_cal))
+        except:
+            msg = '"{}"의 연산 결과\n{}'.format(cal, "올바른 식을 입력하지 않아 계산이 되지 않았습니다.")
+
+        await channel.send(msg)
+        public_query.log_upload(message, "calculator", msg)
+        return None
+
     # OX 퀴즈 검색하기
     if message.content.startswith('!ox ') or message.content.startswith('!OX '):
         if publicJudgeBan.judge(message):
@@ -92,7 +110,6 @@ async def on_message(message):
             return None
 
         channel = message.channel
-        start = time.time()
 
         if message.content == "!필보":
             await channel.send("키워드를 입력해주세요. (ex. !필보 5)")
@@ -101,7 +118,7 @@ async def on_message(message):
         keyword = re.findall('\d+', message.content)[0]
 
         try:
-            msg = public_query.get_boss(keyword, message, start)
+            msg = public_query.get_boss(keyword)
             await channel.send(msg, delete_after=60.0)
             public_query.log_upload(message, "boss", msg)
             return None
