@@ -74,7 +74,7 @@ async def on_message(message):
         except:
             msg = '"{}"의 연산 결과\n{}'.format(cal, "올바른 식을 입력하지 않아 계산이 되지 않았습니다.")
 
-        await channel.send(msg)
+        await channel.send(msg, delete_after=60.0)
         public_query.log_upload(message, "calculator", msg)
         return None
 
