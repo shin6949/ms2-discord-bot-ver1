@@ -437,8 +437,9 @@ class chatbot(discord.Client):
 def thread_execute():
     schedule.every().day.at("05:00").do(backup_db).tag("SQL TASK")
     pprint(schedule.jobs)
+    print("Scheduled")
 
-    while 1:
+    while True:
         schedule.run_pending()
         time.sleep(1)
 
@@ -452,13 +453,15 @@ def backup_db():
 
 if __name__ == "__main__":
     client = chatbot()
-    schedule_thread = threading.Thread(target=thread_execute())
-    schedule_thread.start()
-    print("Thread Started")
+    thread_1 = threading.Thread(target=thread_execute)
+    thread_1.start()
+
+    print("Thread Start")
     # BOT Token
     # Main Token = "{DISCORD_BOT_TOKEN}"
-    # token = "{DISCORD_BOT_TOKEN}"
+    token = "{DISCORD_BOT_TOKEN}"
 
     # Dev Token = "{DISCORD_BOT_TOKEN}"
-    token = "{DISCORD_BOT_TOKEN}"
+    # token = "{DISCORD_BOT_TOKEN}"
     client.run(token)
+
