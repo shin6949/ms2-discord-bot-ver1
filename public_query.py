@@ -12,30 +12,13 @@ def too_many_result():
 
 def log_upload(message, querytype, respond):
     try:
-        channel = message.channel.name
-
-        try:
-            conn = public_SQL.make_connection()
-            curs = conn.cursor()
-            # time, user, type, chat, Server, ServerID, ChannelName
-            query = "insert into PublicVerLog values (now(), %s, %s, %s, %s, %s, %s, %s, %s)"
-            curs.execute(query, (str(message.author), str(message.author.id), str(querytype), str(message.content), str(respond), str(message.guild.name), str(message.guild.id), str(message.channel.name)))
-            conn.commit()
-            conn.close()
-
-        except Exception as d:
-            try:
-                conn = public_SQL.make_backupconnection()
-                curs = conn.cursor()
-                # time, user, type, chat, Server, ServerID, ChannelName
-                query = "insert into PublicVerLog values (now(), %s, %s, %s, %s, %s, %s, %s, %s)"
-                curs.execute(query, (
-                str(message.author), str(message.author.id), str(querytype), str(message.content), str(respond),
-                str(message.guild.name), str(message.guild.id), str(message.channel.name)))
-                conn.commit()
-                conn.close()
-            except:
-                print(d)
+        conn = public_SQL.make_connection()
+        curs = conn.cursor()
+        # time, user, type, chat, Server, ServerID, ChannelName
+        query = "insert into PublicVerLog values (now(), %s, %s, %s, %s, %s, %s, %s, %s)"
+        curs.execute(query, (str(message.author), str(message.author.id), str(querytype), str(message.content), str(respond), str(message.guild.name), str(message.guild.id), str(message.channel.name)))
+        conn.commit()
+        conn.close()
 
     except Exception as e:
         channel = "DM MODE"
@@ -50,18 +33,7 @@ def log_upload(message, querytype, respond):
             conn.close()
 
         except Exception as d:
-            try:
-                conn = public_SQL.make_backupconnection()
-                curs = conn.cursor()
-                # time, user, type, chat, Server, ServerID, ChannelName
-                query = "insert into PublicVerLog values (now(), %s, %s, %s, %s, %s, null, null, %s)"
-                curs.execute(query, (
-                str(message.author), str(message.author.id), str(querytype), str(message.content), str(respond),
-                channel))
-                conn.commit()
-                conn.close()
-            except:
-                print(d)
+            print(d)
 
 
 def return_ox_msg(conn, keyword):
