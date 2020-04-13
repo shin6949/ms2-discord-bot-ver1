@@ -1,12 +1,8 @@
 import re
-import time
-import urllib.request
-
 import discord
 
 # 별도 파일들
 import Mini
-import get_ranking
 import publicJudgeBan
 import public_query
 
@@ -16,11 +12,11 @@ client = discord.Client()
 
 # BOT Token
 # Main Token = "{DISCORD_BOT_TOKEN}"
-# token = "{DISCORD_BOT_TOKEN}"
+token = "{DISCORD_BOT_TOKEN}"
 
 
 # Dev Token
-token = "{DISCORD_BOT_TOKEN}"
+# token = "{DISCORD_BOT_TOKEN}"
 
 # Bot initialize
 @client.event
@@ -146,3 +142,4 @@ async def on_message(message):
             return None
 
 client.run(token)
+

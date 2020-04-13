@@ -31,7 +31,7 @@ def get_recent_minigame():
 
         # Game1: 0: OX, 1: 크레이지 러너즈, 2: 댄댄
         if str(rows[0]['Game1']) == "0":
-            minigame_list.append("OX 퀴즈쇼")
+            minigame_list.append("메이플 OX 퀴즈쇼")
 
         if str(rows[0]['Game1']) == "1":
             minigame_list.append("크레이지 러너즈")
