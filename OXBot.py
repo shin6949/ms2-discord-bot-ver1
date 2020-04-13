@@ -6,15 +6,19 @@ import discord
 from pprint import pprint
 import threading
 
-# ë³„ë„ íŒŒì¼
+# ë³„ë„ ?ŒŒ?¼
 import Mini
 import get_ranking
 import get_tts_mp3
 import inner_query
 import Backup_Task
+import Write_error_log
 
 
-# ë©”ì½©OXë´‡#5381
+# ë©”ì½©OXë´?#5381
+
+def return_location():
+    return "GuildOXBot - OXBot.py"
 
 
 def where_user_in(message):
@@ -23,9 +27,9 @@ def where_user_in(message):
 
     for i in guild_voice_list:
         for j in range(len(i.members)):
-            # i ì±„ë„ì— ìœ ì €ê°€ ìˆìœ¼ë©´
+            # i ì±„ë„?— ?œ ??ê°? ?ˆ?œ¼ë©?
             if str(i.members[j].id) == str(user_id):
-                # ìœ ì €ê°€ ìˆëŠ” ë³´ì´ìŠ¤ ì±„ë„ì„ ë¦¬í„´
+                # ?œ ??ê°? ?ˆ?Š” ë³´ì´?Š¤ ì±„ë„?„ ë¦¬í„´
                 return i
 
     return "False"
@@ -34,19 +38,19 @@ def where_user_in(message):
 def judge_server(message):
     try:
         if not str(message.guild.id) == "{DISCORD_SERVER_ID}" and not str(message.guild.id) == "{DISCORD_SERVER_ID}":
-            msg = "ì´ ë´‡ì€ ì§€ì •ëœ ì„œë²„ì—ì„œë§Œ ì‚¬ìš©í•˜ì‹¤ ìˆ˜ ìˆìŠµë‹ˆë‹¤."
+            msg = "?´ ë´‡ì? ì§?? •?œ ?„œë²„ì—?„œë§? ?‚¬?š©?•˜?‹¤ ?ˆ˜ ?ˆ?Šµ?‹ˆ?‹¤."
             return msg
         else:
             return "True"
 
     except:
-        msg = "ì´ ë´‡ì€ DM ëª¨ë“œë¡œëŠ” ì‚¬ìš©í•˜ì‹¤ ìˆ˜ ì—†ìŠµë‹ˆë‹¤."
+        msg = "?´ ë´‡ì? DM ëª¨ë“œë¡œëŠ” ?‚¬?š©?•˜?‹¤ ?ˆ˜ ?—†?Šµ?‹ˆ?‹¤."
         return msg
 
 
 class chatbot(discord.Client):
     async def on_ready(self):
-        game = discord.Game("!ì„¤ëª…ì„œ, !ã…‹ìœ¼ë¡œ ë¬¸ì œ ê²€ìƒ‰")
+        game = discord.Game("!?„¤ëª…ì„œ, !?…‹?œ¼ë¡? ë¬¸ì œ ê²??ƒ‰")
         await client.change_presence(status=discord.Status.online, activity=game)
         print("READY")
 
@@ -56,7 +60,7 @@ class chatbot(discord.Client):
             voice_channel = where_user_in(message)
 
             if voice_channel == "False":
-                await channel.send('ë“¤ì–´ê°€ ìˆëŠ” ë³´ì´ìŠ¤ ì±„ë„ì´ ì—†ìŠµë‹ˆë‹¤.', delete_after=10.0)
+                await channel.send('?“¤?–´ê°? ?ˆ?Š” ë³´ì´?Š¤ ì±„ë„?´ ?—†?Šµ?‹ˆ?‹¤.', delete_after=10.0)
                 get_tts_mp3.upload_log(message)
                 return None
             else:
@@ -66,7 +70,7 @@ class chatbot(discord.Client):
                     try:
                         current_voiceclient = await voice_channel.connect(timeout=3.0)
                         time.sleep(1)
-                    except Exception as d:
+                    except:
                         current_voiceclient = client.voice_clients[0]
                         if not str(voice_channel.name) == str(current_voiceclient.channel):
                             await current_voiceclient.disconnect(force=True)
@@ -79,32 +83,32 @@ class chatbot(discord.Client):
                         return None
 
                     except:
-                        msg = "ë¨¼ì € ìš”ì²­í•œ ë©”ì‹œì§€ë¥¼ ì¬ìƒí•˜ê³  ìˆìŠµë‹ˆë‹¤."
+                        msg = "ë¨¼ì? ?š”ì²??•œ ë©”ì‹œì§?ë¥? ?¬?ƒ?•˜ê³? ?ˆ?Šµ?‹ˆ?‹¤."
                         await channel.send(msg, delete_after=10.0)
                         get_tts_mp3.upload_log(message)
                         return None
                 else:
-                    msg = "ì„œë²„ ë¬¸ì œë¡œ ì¸í•´ TTS êµ¬ì„±ì— ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤."
+                    msg = "?„œë²? ë¬¸ì œë¡? ?¸?•´ TTS êµ¬ì„±?— ?‹¤?Œ¨?•˜???Šµ?‹ˆ?‹¤."
                     await channel.send(msg, delete_after=10.0)
                     get_tts_mp3.upload_log(message)
                     return None
 
-        if (len(client.voice_clients) > 0) and (not message.content == "!ë‚˜ê°€ê¸°"):
+        if (len(client.voice_clients) > 0) and (not message.content == "!?‚˜ê°?ê¸?"):
             if get_tts_mp3.get_recent_use():
                 channel = message.channel
                 voice_list = client.voice_clients
                 await voice_list[0].disconnect(force=True)
-                await channel.send("30ë¶„ ì´ìƒ ì‚¬ìš©í•˜ì§€ ì•Šì•„ ë‚˜ê°”ìŠµë‹ˆë‹¤.", delete_after=120.0)
+                await channel.send("30ë¶? ?´?ƒ ?‚¬?š©?•˜ì§? ?•Š?•„ ?‚˜ê°”ìŠµ?‹ˆ?‹¤.", delete_after=120.0)
 
-        if not str(message.author) == "ë©”ì½©ë´‡#5381":
+        if not str(message.author) == "ë©”ì½©ë´?#5381":
             pass
 
-        # senderê°€ botì¼ ê²½ìš° ignore
+        # senderê°? bot?¼ ê²½ìš° ignore
         if message.author.bot:
             return None
 
-        # ì‹œê°„
-        if message.content == '!ì‹œê°„' or message.content == "!time" or message.content == "!TIME":
+        # ?‹œê°?
+        if message.content == '!?‹œê°?' or message.content == "!time" or message.content == "!TIME":
             channel = message.channel
 
             judge = judge_server(message)
@@ -113,13 +117,13 @@ class chatbot(discord.Client):
                 return None
 
             now = time.localtime()
-            string = "%04dë…„ %02dì›” %02dì¼ %02dì‹œ %02dë¶„ %02dì´ˆ" % (
+            string = "%04d?…„ %02d?›” %02d?¼ %02d?‹œ %02dë¶? %02dì´?" % (
             now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
-            msg = "í˜„ì¬ ì‹œê°„ì€ " + string + " ì…ë‹ˆë‹¤. (GMT+9)"
+            msg = "?˜„?¬ ?‹œê°„ì? " + string + " ?…?‹ˆ?‹¤. (GMT+9)"
             await channel.send(msg)
             return None
 
-        if message.content.startswith("!ì—°ì‚° "):
+        if message.content.startswith("!?—°?‚° "):
             channel = message.channel
 
             judge = judge_server(message)
@@ -127,18 +131,18 @@ class chatbot(discord.Client):
                 await channel.send(judge)
                 return None
 
-            cal = message.content.replace("!ì—°ì‚° ", "")
+            cal = message.content.replace("!?—°?‚° ", "")
             python_cal = cal.replace("x", "*").replace("X", "*").replace("Ã·", "/")
 
             try:
-                msg = '"{}"ì˜ ì—°ì‚° ê²°ê³¼\n{}'.format(cal, eval(python_cal))
+                msg = '"{}"?˜ ?—°?‚° ê²°ê³¼\n{}'.format(cal, eval(python_cal))
             except:
-                msg = '"{}"ì˜ ì—°ì‚° ê²°ê³¼\n{}'.format(cal, "ì˜¬ë°”ë¥¸ ì‹ì„ ì…ë ¥í•˜ì§€ ì•Šì•„ ê³„ì‚°ì´ ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.")
+                msg = '"{}"?˜ ?—°?‚° ê²°ê³¼\n{}'.format(cal, "?˜¬ë°”ë¥¸ ?‹?„ ?…? ¥?•˜ì§? ?•Š?•„ ê³„ì‚°?´ ?˜ì§? ?•Š?•˜?Šµ?‹ˆ?‹¤.")
 
             await channel.send(msg)
             return None
 
-        # ë¯¸ë‹ˆê²Œì„ ì‹œê°„í‘œ
+        # ë¯¸ë‹ˆê²Œì„ ?‹œê°„í‘œ
         if message.content == "!ë¯¸ê²œ":
             channel = message.channel
 
@@ -151,15 +155,15 @@ class chatbot(discord.Client):
             await channel.send(msg)
             return None
 
-        # OX í€´ì¦ˆ ê²€ìƒ‰í•˜ê¸°
-        if message.content == '!ox' or message.content == '!OX' or message.content == '!í€´ì¦ˆ' or message.content == '!ã…‹' or message.content == '!q':
+        # OX ?´ì¦ˆ ê²??ƒ‰?•˜ê¸?
+        if message.content == '!ox' or message.content == '!OX' or message.content == '!?´ì¦ˆ' or message.content == '!?…‹' or message.content == '!q':
             channel = message.channel
-            msg = "ì…ë ¥í•œ í‚¤ì›Œë“œê°€ ì—†ìŠµë‹ˆë‹¤!!"
+            msg = "?…? ¥?•œ ?‚¤?›Œ?“œê°? ?—†?Šµ?‹ˆ?‹¤!!"
             await channel.send(msg)
             return None
 
         if message.content.startswith('!ox ') or message.content.startswith('!OX ') or message.content.startswith(
-                '!í€´ì¦ˆ ') or message.content.startswith('!ã…‹ ') or message.content.startswith('!q '):
+                '!?´ì¦ˆ ') or message.content.startswith('!?…‹ ') or message.content.startswith('!q '):
             channel = message.channel
 
             judge = judge_server(message)
@@ -170,11 +174,11 @@ class chatbot(discord.Client):
             start = time.time()
 
             try:
-                keyword = message.content.replace("!ox ", "", 1).replace("!OX ", "", 1).replace("!í€´ì¦ˆ ", "", 1).replace(
-                    "!ã…‹ ", "", 1).replace("!q ", "", 1).lstrip().rstrip()
+                keyword = message.content.replace("!ox ", "", 1).replace("!OX ", "", 1).replace("!?´ì¦ˆ ", "", 1).replace(
+                    "!?…‹ ", "", 1).replace("!q ", "", 1).lstrip().rstrip()
 
                 if len(keyword) < 2:
-                    msg = "ê²€ìƒ‰ì–´ëŠ” 2ê¸€ì ì´ìƒ ì…ë ¥í•´ì£¼ì„¸ìš”."
+                    msg = "ê²??ƒ‰?–´?Š” 2ê¸?? ?´?ƒ ?…? ¥?•´ì£¼ì„¸?š”."
                     await channel.send(msg)
                     return None
 
@@ -183,11 +187,11 @@ class chatbot(discord.Client):
                 return None
 
             except Exception as e:
-                print(e)
+                Write_error_log.write_log(return_location(), str(e))
                 return None
 
-        # í•„ë³´ ê²€ìƒ‰
-        if message.content.startswith("!í•„ë³´"):
+        # ?•„ë³? ê²??ƒ‰
+        if message.content.startswith("!?•„ë³?"):
             channel = message.channel
 
             judge = judge_server(message)
@@ -197,8 +201,8 @@ class chatbot(discord.Client):
 
             start = time.time()
 
-            if message.content == "!í•„ë³´":
-                await channel.send("í‚¤ì›Œë“œë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”. (ex. !í•„ë³´ 5)")
+            if message.content == "!?•„ë³?":
+                await channel.send("?‚¤?›Œ?“œë¥? ?…? ¥?•´ì£¼ì„¸?š”. (ex. !?•„ë³? 5)")
                 return None
 
             keyword = re.findall('\d+', message.content)[0]
@@ -209,7 +213,7 @@ class chatbot(discord.Client):
                 return None
 
             except Exception as e:
-                print(e)
+                Write_error_log.write_log(return_location(), str(e))
                 return None
 
         if message.content.startswith("!ê¸¸íŠ¸"):
@@ -225,14 +229,14 @@ class chatbot(discord.Client):
                 await channel.send(msg)
                 return None
 
-            if message.content == "!ê¸¸íŠ¸ì¢…" or message.content == "!ê¸¸íŠ¸ì¢… ":
+            if message.content == "!ê¸¸íŠ¸ì¢?" or message.content == "!ê¸¸íŠ¸ì¢? ":
                 msg = get_ranking.get_guild_ranking("None") \
-                      + "-ì´ ìˆœìœ„ëŠ” ì¢…í•© ìˆœìœ„ë¡œ í•˜ë£¨ì— í•œë²ˆ ì—…ë°ì´íŠ¸ ë©ë‹ˆë‹¤.-"
+                      + "-?´ ?ˆœ?œ„?Š” ì¢…í•© ?ˆœ?œ„ë¡? ?•˜ë£¨ì— ?•œë²? ?—…?°?´?Š¸ ?©?‹ˆ?‹¤.-"
                 await channel.send(msg)
                 return None
 
-            if not message.content.find("!ê¸¸íŠ¸ì¢…") == -1:
-                keyword = message.content.replace("!ê¸¸íŠ¸ì¢… ", "", 1)
+            if not message.content.find("!ê¸¸íŠ¸ì¢?") == -1:
+                keyword = message.content.replace("!ê¸¸íŠ¸ì¢? ", "", 1)
                 guild_list = get_ranking.get_guild_ranking_search_by_keyword("None", keyword)
 
                 if str(type(guild_list)) == "<class 'str'>":
@@ -240,7 +244,7 @@ class chatbot(discord.Client):
                     await channel.send(msg)
                     return None
 
-                guild_list[0]['guildmsg'] += "-ì´ ìˆœìœ„ëŠ” ì¢…í•© ìˆœìœ„ë¡œ í•˜ë£¨ì— í•œë²ˆ ì—…ë°ì´íŠ¸ ë©ë‹ˆë‹¤.-"
+                guild_list[0]['guildmsg'] += "-?´ ?ˆœ?œ„?Š” ì¢…í•© ?ˆœ?œ„ë¡? ?•˜ë£¨ì— ?•œë²? ?—…?°?´?Š¸ ?©?‹ˆ?‹¤.-"
 
                 urllib.request.urlretrieve(guild_list[0]['imgurl'], guild_list[0]['name'] + ".png")
                 await channel.send(file=discord.File(guild_list[0]['name'] + ".png"))
@@ -277,14 +281,14 @@ class chatbot(discord.Client):
                 await channel.send(msg)
                 return None
 
-            if message.content == "!ê°œíŠ¸ì¢…" or message.content == "!ê°œíŠ¸ì¢… ":
+            if message.content == "!ê°œíŠ¸ì¢?" or message.content == "!ê°œíŠ¸ì¢? ":
                 msg = get_ranking.get_person_ranking("None") \
-                      + "\n-ì´ ìˆœìœ„ëŠ” ì¢…í•© ìˆœìœ„ë¡œ í•˜ë£¨ì— í•œë²ˆ ì—…ë°ì´íŠ¸ ë©ë‹ˆë‹¤.-"
+                      + "\n-?´ ?ˆœ?œ„?Š” ì¢…í•© ?ˆœ?œ„ë¡? ?•˜ë£¨ì— ?•œë²? ?—…?°?´?Š¸ ?©?‹ˆ?‹¤.-"
                 await channel.send(msg)
                 return None
 
-            if not message.content.find("!ê°œíŠ¸ì¢…") == -1:
-                keyword = message.content.replace("!ê°œíŠ¸ì¢… ", "", 1)
+            if not message.content.find("!ê°œíŠ¸ì¢?") == -1:
+                keyword = message.content.replace("!ê°œíŠ¸ì¢? ", "", 1)
                 person_list = get_ranking.get_person_ranking_search_by_keyword("realtime", keyword)
 
                 if str(type(person_list)) == "<class 'str'>":
@@ -292,7 +296,7 @@ class chatbot(discord.Client):
                     await channel.send(msg)
                     return None
 
-                person_list[0]['personmsg'] += "-ì´ ìˆœìœ„ëŠ” ì¢…í•© ìˆœìœ„ë¡œ í•˜ë£¨ì— í•œë²ˆ ì—…ë°ì´íŠ¸ ë©ë‹ˆë‹¤.-"
+                person_list[0]['personmsg'] += "-?´ ?ˆœ?œ„?Š” ì¢…í•© ?ˆœ?œ„ë¡? ?•˜ë£¨ì— ?•œë²? ?—…?°?´?Š¸ ?©?‹ˆ?‹¤.-"
 
                 urllib.request.urlretrieve(person_list[0]['imgurl'], person_list[0]['name'] + ".png")
                 await channel.send(file=discord.File(person_list[0]['name'] + ".png"))
@@ -316,85 +320,85 @@ class chatbot(discord.Client):
             await channel.send(msg)
             return None
 
-        if message.content == "!ì„¤ì •":
+        if message.content == "!?„¤? •":
             channel = message.channel
-            embed = discord.Embed(title="ì„¤ì • ë°©ë²•",
-                                  description="\"!ì„¤ì • (íƒ€ì…)(ì†ë„)(ë³¼ë¥¨)(ë°˜ë§ì—¬ë¶€)\"ë¡œ ì œì¶œí•´ì£¼ì„¸ìš”. (ë„ì–´ì“°ê¸° ì—†ì´!)\nì„¤ì • ë³€ê²½ë„ ë™ì¼í•©ë‹ˆë‹¤. ì´ ë©”ì‹œì§€ëŠ” 120ì´ˆ í›„ ì‚­ì œë©ë‹ˆë‹¤.")
-            embed.add_field(name="íƒ€ì…", value="1: ì—¬ì„± ì°¨ë¶„í•œ ë‚­ë…ì²´\n2: ë‚¨ì„± ì°¨ë¶„í•œ ë‚­ë…ì²´\n3: ì—¬ì„± ë°ì€ ëŒ€í™”ì²´\n4: ë‚¨ì„± ë°ì€ ëŒ€í™”ì²´", inline=False)
-            embed.add_field(name="ì†ë„", value="1: ëŠë¦¼\n2: ë³´í†µ\n3: ë¹ ë¦„", inline=False)
-            embed.add_field(name="ë³¼ë¥¨", value="1: 0.7ë°°\n2: 1.0ë°°\n3: 1.4ë°°", inline=False)
-            embed.add_field(name="ë°˜ë§ ì—¬ë¶€ (\"ì•ˆë…•í•˜ì„¸ìš”\"ë¼ê³  ì…ë ¥í•´ë„ \"ì•ˆë…•\"ì´ë¼ê³  ë§í•¨.)", value="1: ì„¤ì • ì•ˆí•¨\n2: ì„¤ì •", inline=False)
-            embed.add_field(name="ì„¤ì • ì˜ˆì‹œ", value="!ì„¤ì • 2221", inline=False)
+            embed = discord.Embed(title="?„¤? • ë°©ë²•",
+                                  description="\"!?„¤? • (???…)(?†?„)(ë³¼ë¥¨)(ë°˜ë§?—¬ë¶?)\"ë¡? ? œì¶œí•´ì£¼ì„¸?š”. (?„?–´?“°ê¸? ?—†?´!)\n?„¤? • ë³?ê²½ë„ ?™?¼?•©?‹ˆ?‹¤. ?´ ë©”ì‹œì§??Š” 120ì´? ?›„ ?‚­? œ?©?‹ˆ?‹¤.")
+            embed.add_field(name="???…", value="1: ?—¬?„± ì°¨ë¶„?•œ ?‚­?…ì²?\n2: ?‚¨?„± ì°¨ë¶„?•œ ?‚­?…ì²?\n3: ?—¬?„± ë°ì? ???™”ì²?\n4: ?‚¨?„± ë°ì? ???™”ì²?", inline=False)
+            embed.add_field(name="?†?„", value="1: ?Šë¦?\n2: ë³´í†µ\n3: ë¹ ë¦„", inline=False)
+            embed.add_field(name="ë³¼ë¥¨", value="1: 0.7ë°?\n2: 1.0ë°?\n3: 1.4ë°?", inline=False)
+            embed.add_field(name="ë°˜ë§ ?—¬ë¶? (\"?•ˆ?…•?•˜?„¸?š”\"?¼ê³? ?…? ¥?•´?„ \"?•ˆ?…•\"?´?¼ê³? ë§í•¨.)", value="1: ?„¤? • ?•ˆ?•¨\n2: ?„¤? •", inline=False)
+            embed.add_field(name="?„¤? • ?˜ˆ?‹œ", value="!?„¤? • 2221", inline=False)
 
             await channel.send(embed=embed, delete_after=120.0)
             return None
 
-        if message.content.startswith("!ì„¤ì • "):
+        if message.content.startswith("!?„¤? • "):
             channel = message.channel
-            value = message.content.replace("!ì„¤ì • ", "", 1)
+            value = message.content.replace("!?„¤? • ", "", 1)
             try:
                 value_list = [int(value[0]) - 1, int(value[1]) - 1, int(value[2]) - 1, int(value[3]) - 1]
 
                 if not 0 <= int(value_list[0]) <= 3:
-                    msg = "ì˜ëª» ëœ íƒ€ì… ê°’ ì…ë‹ˆë‹¤."
+                    msg = "?˜ëª? ?œ ???… ê°? ?…?‹ˆ?‹¤."
                     await channel.send(msg, delete_after=10.0)
                     return None
 
                 if not 0 <= int(value_list[1]) <= 2:
-                    msg = "ì˜ëª» ëœ ì†ë„ ê°’ ì…ë‹ˆë‹¤."
+                    msg = "?˜ëª? ?œ ?†?„ ê°? ?…?‹ˆ?‹¤."
                     await channel.send(msg, delete_after=10.0)
                     return None
 
                 if not 0 <= int(value_list[2]) <= 2:
-                    msg = "ì˜ëª» ëœ ë³¼ë¥¨ ê°’ ì…ë‹ˆë‹¤."
+                    msg = "?˜ëª? ?œ ë³¼ë¥¨ ê°? ?…?‹ˆ?‹¤."
                     await channel.send(msg, delete_after=10.0)
                     return None
 
                 if not 0 <= int(value_list[3]) <= 1:
-                    msg = "ì˜ëª» ëœ ë°˜ë§ ì—¬ë¶€ ê°’ ì…ë‹ˆë‹¤."
+                    msg = "?˜ëª? ?œ ë°˜ë§ ?—¬ë¶? ê°? ?…?‹ˆ?‹¤."
                     await channel.send(msg, delete_after=10.0)
                     return None
 
                 if get_tts_mp3.upload_user_setting(message, value_list):
-                    msg = "ì„¤ì • ì™„ë£Œ!"
+                    msg = "?„¤? • ?™„ë£?!"
                     await channel.send(msg)
                     return None
 
                 else:
-                    msg = "ì„œë²„ ë¬¸ì œë¡œ ì¸í•´ ì„¤ì •í•˜ì§€ ëª»í–ˆìŠµë‹ˆë‹¤."
+                    msg = "?„œë²? ë¬¸ì œë¡? ?¸?•´ ?„¤? •?•˜ì§? ëª»í–ˆ?Šµ?‹ˆ?‹¤."
                     await channel.send(msg)
                     return None
 
             except:
-                msg = "ì˜ëª» ëœ ê°’ì„ ì…ë ¥í•˜ì…¨ìŠµë‹ˆë‹¤."
+                msg = "?˜ëª? ?œ ê°’ì„ ?…? ¥?•˜?…¨?Šµ?‹ˆ?‹¤."
                 await channel.send(msg)
                 return None
 
-        if message.content == "!í˜„ì¬ì„¤ì •":
+        if message.content == "!?˜„?¬?„¤? •":
             channel = message.channel
             now_setting = get_tts_mp3.configure_setting_text(message)
 
             if len(now_setting) == 0:
-                await channel.send('ì„¤ì • ê°’ì´ ì—†ìŠµë‹ˆë‹¤.')
+                await channel.send('?„¤? • ê°’ì´ ?—†?Šµ?‹ˆ?‹¤.')
                 return None
 
-            embed = discord.Embed(title="í˜„ì¬ ì„¤ì • (ì¹´ì¹´ì˜¤ API)")
-            embed.add_field(name="íƒ€ì…", value=str(now_setting[0]), inline=False)
-            embed.add_field(name="ì†ë„", value=str(now_setting[1]), inline=False)
+            embed = discord.Embed(title="?˜„?¬ ?„¤? • (ì¹´ì¹´?˜¤ API)")
+            embed.add_field(name="???…", value=str(now_setting[0]), inline=False)
+            embed.add_field(name="?†?„", value=str(now_setting[1]), inline=False)
             embed.add_field(name="ë³¼ë¥¨", value=str(now_setting[2]), inline=False)
-            embed.add_field(name="ë°˜ë§ ì—¬ë¶€ (\"ì•ˆë…•í•˜ì„¸ìš”\"ë¼ê³  ì…ë ¥í•´ë„ \"ì•ˆë…•\"ì´ë¼ê³  ë§í•¨.)", value=str(now_setting[3]), inline=False)
-            await channel.send("<@" + str(message.author.id) + "> ë‹˜ì˜ í˜„ì¬ ì„¤ì •ì…ë‹ˆë‹¤.", embed=embed, delete_after=120.0)
+            embed.add_field(name="ë°˜ë§ ?—¬ë¶? (\"?•ˆ?…•?•˜?„¸?š”\"?¼ê³? ?…? ¥?•´?„ \"?•ˆ?…•\"?´?¼ê³? ë§í•¨.)", value=str(now_setting[3]), inline=False)
+            await channel.send("<@" + str(message.author.id) + "> ?‹˜?˜ ?˜„?¬ ?„¤? •?…?‹ˆ?‹¤.", embed=embed, delete_after=120.0)
 
-        if message.content == "!ë‚˜ê°€ê¸°":
+        if message.content == "!?‚˜ê°?ê¸?":
             channel = message.channel
             voice_list = client.voice_clients
 
             if len(voice_list) == 0:
-                await channel.send('ë“¤ì–´ê°„ ë³´ì´ìŠ¤ ì±„ë„ì´ ì—†ìŠµë‹ˆë‹¤.', delete_after=10.0)
+                await channel.send('?“¤?–´ê°? ë³´ì´?Š¤ ì±„ë„?´ ?—†?Šµ?‹ˆ?‹¤.', delete_after=10.0)
                 return None
             else:
                 await voice_list[0].disconnect(force=True)
-                await channel.send('ë‚˜ê°€ê¸° ì™„ë£Œ', delete_after=10.0)
+                await channel.send('?‚˜ê°?ê¸? ?™„ë£?', delete_after=10.0)
                 return None
 
         if message.content.startswith("!"):
@@ -417,7 +421,7 @@ class chatbot(discord.Client):
 def thread_execute():
     schedule.every().day.at("05:00").do(backup_db).tag("SQL TASK")
     pprint(schedule.jobs)
-    print("Scheduled")
+    Write_error_log.write_log(return_location(), "Task Scheduled")
 
     while True:
         schedule.run_pending()
@@ -426,9 +430,9 @@ def thread_execute():
 
 def backup_db():
     if Backup_Task.backup_db():
-        print("Task Finished")
+        Write_error_log.write_log(return_location(), "Backup Task Finished")
     else:
-        print("Task Failed")
+        Write_error_log.write_log(return_location(), "Backup Task Failed")
 
 
 if __name__ == "__main__":
@@ -436,7 +440,7 @@ if __name__ == "__main__":
     thread_1 = threading.Thread(target=thread_execute)
     thread_1.start()
 
-    print("Thread Start")
+    Write_error_log.write_log(return_location(), "Thread Start")
     # BOT Token
     # Main Token = "{DISCORD_BOT_TOKEN}"
     token = "{DISCORD_BOT_TOKEN}"

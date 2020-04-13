@@ -2,6 +2,13 @@ import requests
 import pymysql
 from datetime import datetime, timedelta
 
+# 별도 파일
+import Write_error_log
+
+
+def return_location():
+    return "GuildOXBot - get_tts_mp3.py"
+
 
 def configure_db():
     conn = pymysql.connect(host='{DB_HOST}', user='{DB_USER}', password='{DB_PASSWORD}',
@@ -10,7 +17,7 @@ def configure_db():
 
 
 def configure_backup_db():
-    conn = pymysql.connect(host='35.247.10.252', user='{DB_USER}', password='{DB_PASSWORD}',
+    conn = pymysql.connect(host='{DB_HOST}', user='{DB_USER}', password='{DB_PASSWORD}',
                            db='TTS', charset='utf8mb4')
     return conn
 
@@ -30,7 +37,7 @@ def get_recent_use():
         return False
 
     except Exception as e:
-        print(e)
+        Write_error_log.write_log(return_location(), str(e))
         return True
 
 
@@ -53,7 +60,7 @@ def upload_log(message):
         backupconn.close()
 
     except Exception as e:
-        print(e)
+        Write_error_log.write_log(return_location(), str(e))
         return True
 
 
@@ -184,7 +191,7 @@ def upload_user_setting(message, value_list):
             return True
 
     except Exception as e:
-        print(e)
+        Write_error_log.write_log(return_location(), str(e))
         return False
 
 
@@ -208,7 +215,7 @@ def update_user_setting(message, value_list):
         return True
 
     except Exception as e:
-        print(e)
+        Write_error_log.write_log(return_location(), str(e))
         return False
 
 
@@ -242,6 +249,6 @@ def get_kakao_mp3(message, keyword):
 
         return True
     except Exception as e:
-        print(e)
+        Write_error_log.write_log(return_location(), str(e))
         return False
 

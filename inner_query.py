@@ -8,6 +8,10 @@ import SQL
 import Write_error_log
 
 
+def return_location():
+    return "GuildOXBot - inner_query.py"
+
+
 def too_many_result():
     return "검색 결과가 30개가 넘어요!\n디스코드 내 최대 글자수 제한이 있어서 결과를 표시 할 수 없습니다. 좀 더 길게 검색해보세요."
 
@@ -18,11 +22,15 @@ def return_ox_msg(conn, keyword, message, start):
     query = "SELECT num, answer, problem FROM Problem WHERE problem LIKE '%{}%'".format(sql_keyword)
     curs.execute(query)
     rows = curs.fetchall()
+    conn.close()
 
-    if len(rows) > 30:
+    if len(rows) == 0:
+        msg = "\"{}\"에 대한 검색 결과가 없습니다.\n제보는 '!제보'".format(keyword)
+        return msg
+    elif len(rows) > 30:
         return too_many_result()
-
-    msg = "\"{}\"에 대한 검색 결과: {}개".format(keyword, len(rows))
+    else:
+         msg = "\"{}\"에 대한 검색 결과: {}개".format(keyword, len(rows))
 
     msg_list = []
     for i in rows:
@@ -37,9 +45,6 @@ def return_ox_msg(conn, keyword, message, start):
     for i in msg_list:
         msg += i
 
-    conn.commit()
-    conn.close()
-
     return msg
 
 
@@ -47,18 +52,20 @@ def get_query_result(keyword, message, start):
     try:
         conn = SQL.make_connection()
         msg = return_ox_msg(conn, keyword, message, start)
-
+        if conn.open:
+            conn.close()
         return msg
 
     except:
         try:
             conn = SQL.make_backupconnection()
             msg = return_ox_msg(conn, keyword, message, start)
-
+            if conn.open:
+                conn.close()
             return msg
 
         except Exception as e:
-            Write_error_log.write_log(e)
+            Write_error_log.write_log(return_location(), str(e))
             msg = "서버 이상으로 데이터를 갖고 올 수 없습니다."
             return msg
 
@@ -84,8 +91,6 @@ def return_boss_msg(conn, keyword, message, start):
     for i in msg_list:
         msg += i
 
-    conn.commit()
-    conn.close()
     return msg
 
 
@@ -93,18 +98,20 @@ def get_boss(keyword, message, start):
     try:
         conn = SQL.make_connection()
         msg = return_boss_msg(conn, keyword, message, start)
-
+        if conn.open:
+            conn.close()
         return msg
 
     except:
         try:
             conn = SQL.make_backupconnection()
             msg = return_boss_msg(conn, keyword, message, start)
-
+            if conn.open:
+                conn.close()
             return msg
 
         except Exception as e:
-            Write_error_log.write_log(e)
+            Write_error_log.write_log(return_location(), str(e))
             msg = "서버 이상으로 데이터를 갖고 올 수 없습니다."
             return msg
 
@@ -127,18 +134,20 @@ def get_custom_query(message):
     try:
         conn = SQL.make_connection()
         msg = return_custom_msg(conn, message)
-        conn.close()
+        if conn.open:
+            conn.close()
         return msg
 
     except:
         try:
             conn = SQL.make_backupconnection()
             msg = return_custom_msg(conn, message)
-            conn.close()
+            if conn.open:
+                conn.close()
             return msg
 
         except Exception as e:
-            Write_error_log.write_log(e)
+            Write_error_log.write_log(return_location(), str(e))
             return "False"
 
 
@@ -189,5 +198,5 @@ def get_chat(keyword):
         return chatlist
 
     except Exception as e:
-        Write_error_log.write_log(e)
+        Write_error_log.write_log(return_location(), str(e))
         return "False"

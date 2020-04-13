@@ -1,8 +1,13 @@
 from datetime import datetime, timedelta
-
 import pymysql
-
 import SQL
+
+# 별도 파일
+import Write_error_log
+
+
+def return_location():
+    return "Mini.py"
 
 
 def get_recent_minigame():
@@ -65,12 +70,13 @@ def get_recent_minigame():
             msg += i + "\n"
 
         msg += "```"
-        conn.commit()
-        conn.close()
+
+        if conn.open:
+            conn.close()
 
         return msg
 
     except Exception as e:
-        print(e)
+        Write_error_log.write_log(return_location(), str(e))
         msg = "서버 이상으로 데이터를 갖고 올 수 없습니다."
         return msg

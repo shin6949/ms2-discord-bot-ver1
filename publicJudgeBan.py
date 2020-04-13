@@ -1,6 +1,13 @@
 import pymysql
 import public_SQL
 
+# 별도 파일
+import Write_error_log
+
+
+def return_location():
+    return "PublicOXBot - publicJudgeBan.py"
+
 
 def judge(message):
     try:
@@ -20,11 +27,13 @@ def judge(message):
 
             # 서버가 밴이 아니라면
             if len(rows) == 0:
-                conn.close()
+                if conn.open:
+                    conn.close()
                 return False
             # 서버가 밴이라면
             else:
-                conn.close()
+                if conn.open:
+                    conn.close()
                 return True
             
         # 밴 유저인 경우
@@ -32,7 +41,7 @@ def judge(message):
             conn.close()
             return True
 
-    except Exception as e:
+    except:
         try:
             conn = public_SQL.make_backupconnection()
             curs = conn.cursor(pymysql.cursors.DictCursor)
@@ -50,11 +59,13 @@ def judge(message):
 
                 # 서버가 밴이 아니라면
                 if len(rows) == 0:
-                    conn.close()
+                    if conn.open:
+                        conn.close()
                     return False
                 # 서버가 밴이라면
                 else:
-                    conn.close()
+                    if conn.open:
+                        conn.close()
                     return True
 
             # 밴 유저인 경우
@@ -62,7 +73,7 @@ def judge(message):
                 conn.close()
                 return True
 
-        except:
-            print(e)
+        except Exception as e:
+            Write_error_log.write_log(return_location(), str(e))
             return False
 

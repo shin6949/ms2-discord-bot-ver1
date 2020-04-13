@@ -1,11 +1,11 @@
 from datetime import datetime
 
 
-def write_log(commit):
+def write_log(location, commit):
     try:
         logfile = open("./error.txt", 'a')
-        error_msg = "{}\n{}\n".format(str(datetime.now()), commit)
-        logfile.write(error_msg)
+        error_msg = "{} at {}\n{}\n\n".format(str(datetime.now()), location, commit)
+        logfile.write(str(error_msg))
         logfile.close()
         return True
 

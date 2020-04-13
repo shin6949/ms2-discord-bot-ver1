@@ -3,6 +3,13 @@ import math
 from collections import defaultdict
 import requests
 
+# 별도 파일
+import Write_error_log
+
+
+def return_location():
+    return "GuildOXBot - get_ranking.py"
+
 
 def html_source_request(url):
     return requests.get(url).text
@@ -41,10 +48,8 @@ def get_guild_ranking(gettype):
         return msg
 
     except Exception as e:
-        print(e)
-        msg = "서버 내 문제로 인해 불러올 수 없습니다."
-
-        return msg
+        Write_error_log.write_log(return_location(), str(e))
+        return "서버 내 문제로 인해 불러올 수 없습니다."
 
 
 def get_guild_ranking_search_by_keyword(gettype, keyword):
@@ -92,16 +97,13 @@ def get_guild_ranking_search_by_keyword(gettype, keyword):
 
             return ranking_table
 
-        except Exception as d:
-            msg = "찾는 길드는 없는 길드 입니다."
-
-            return msg
+        except:
+            return "찾는 길드는 없는 길드 입니다."
 
     except Exception as e:
-        print(e)
-        msg = "서버 내 문제로 인해 불러올 수 없습니다."
+        Write_error_log.write_log(return_location(), str(e))
 
-        return msg
+        return "서버 내 문제로 인해 불러올 수 없습니다."
 
 
 def get_guild_ranking_search_by_number(gettype, num):
@@ -135,16 +137,12 @@ def get_guild_ranking_search_by_number(gettype, num):
 
             return msg
 
-        except Exception as d:
-            msg = "찾는 길드는 없는 길드 입니다."
-
-            return msg
+        except:
+            return "찾는 길드는 없는 길드 입니다."
 
     except Exception as e:
-        print(e)
-        msg = "서버 내 문제로 인해 불러올 수 없습니다."
-
-        return msg
+        Write_error_log.write_log(return_location(), str(e))
+        return "서버 내 문제로 인해 불러올 수 없습니다."
 
 
 def get_person_ranking(gettype):
@@ -178,10 +176,9 @@ def get_person_ranking(gettype):
         return msg
 
     except Exception as e:
-        print(e)
-        msg = "서버 내 문제로 인해 불러올 수 없습니다."
+        Write_error_log.write_log(return_location(), str(e))
 
-        return msg
+        return "서버 내 문제로 인해 불러올 수 없습니다."
 
 
 def get_person_ranking_search_by_keyword(gettype, keyword):
@@ -226,15 +223,13 @@ def get_person_ranking_search_by_keyword(gettype, keyword):
 
             return ranking_table
 
-        except Exception as d:
-            msg = "찾는 캐릭터는 없는 캐릭터 입니다."
-            return msg
+        except:
+            return "찾는 캐릭터는 없는 캐릭터 입니다."
 
     except Exception as e:
-        print(e)
-        msg = "서버 내 문제로 인해 불러올 수 없습니다."
+        Write_error_log.write_log(return_location(), str(e))
 
-        return msg
+        return "서버 내 문제로 인해 불러올 수 없습니다."
 
 
 def get_person_ranking_search_by_number(gettype, num):
@@ -267,14 +262,10 @@ def get_person_ranking_search_by_number(gettype, num):
 
             return msg
 
-        except Exception as d:
-            msg = "찾는 캐릭터는 없는 캐릭터 입니다."
-
-            return msg
+        except:
+            return "찾는 캐릭터는 없는 캐릭터 입니다."
 
     except Exception as e:
-        print(e)
-        msg = "서버 내 문제로 인해 불러올 수 없습니다."
-
-        return msg
+        Write_error_log.write_log(return_location(), str(e))
+        return "서버 내 문제로 인해 불러올 수 없습니다."
 

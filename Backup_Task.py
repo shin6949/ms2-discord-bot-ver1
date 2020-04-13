@@ -5,6 +5,10 @@ import datetime
 import Write_error_log
 
 
+def return_location():
+    return "GuildOXBot - Backup_Task"
+
+
 def backup_db():
     try:
         main_conn = pymysql.connect(host='{DB_HOST}', user='{DB_USER}', password='{DB_PASSWORD}', db='MS2OX',
@@ -12,7 +16,7 @@ def backup_db():
         backup_conn = pymysql.connect(host='{DB_HOST}', user='{DB_USER}', password='{DB_PASSWORD}', db='MS2OX',
                                       charset='utf8mb4')
     except Exception as e:
-        Write_error_log.write_log(e)
+        Write_error_log.write_log(return_location(), str(e))
         return False
 
     # 전날 오전 5시를 지정
@@ -33,7 +37,7 @@ def backup_db():
                                  data["respond"], data["Server"], data["SeverID"], data["ChannelName"]))
             backup_conn.commit()
         except Exception as e:
-            Write_error_log.write_log(e)
+            Write_error_log.write_log(return_location(), str(e))
 
     # 한달전 5시를 지정
     month = (datetime.datetime.now() + datetime.timedelta(days=-30)).strftime('%Y-%m-%d 05:00:00')
@@ -44,7 +48,7 @@ def backup_db():
         curs.execute(query)
         main_conn.commit()
     except Exception as e:
-        Write_error_log.write_log(e)
+        Write_error_log.write_log(return_location(), str(e))
 
     main_conn.close()
     backup_conn.close()

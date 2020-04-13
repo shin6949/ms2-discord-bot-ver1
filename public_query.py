@@ -1,46 +1,31 @@
 import time
 import pymysql
-import random
 
 # 별도 파일
 import public_SQL
 import Write_error_log
 
 
+def return_location():
+    return "PublicOXBot - public_query.py"
+
+
 def too_many_result():
     return "검색 결과가 30개가 넘어요!\n디스코드 내 최대 글자수 제한이 있어서 결과를 표시 할 수 없습니다. 좀 더 길게 검색해보세요."
 
 
-# 서버에 로그를 업로드하는 코드
 def log_upload(message, querytype, respond):
-    conn = public_SQL.make_connection()
-
     try:
+        conn = public_SQL.make_connection()
         curs = conn.cursor()
         # time, user, type, chat, Server, ServerID, ChannelName
         query = "insert into PublicVerLog values (now(), %s, %s, %s, %s, %s, %s, %s, %s)"
         curs.execute(query, (str(message.author), str(message.author.id), str(querytype), str(message.content), str(respond), str(message.guild.name), str(message.guild.id), str(message.channel.name)))
         conn.commit()
         conn.close()
-    
-    # 에러가 나면 채널 쪽에서 에러가 난 것이라 DM일 것이라 추측할 수 있으므로 예외처리
-    except:
-        channel = "DM MODE"
 
-        try:
-            curs = conn.cursor()
-            # time, user, type, chat, Server, ServerID, ChannelName
-            query = "insert into PublicVerLog values (now(), %s, %s, %s, %s, %s, null, null, %s)"
-            curs.execute(query, (str(message.author), str(message.author.id), str(querytype), str(message.content), str(respond), channel))
-            conn.commit()
-            conn.close()
-
-        except Exception as d:
-            Write_error_log.write_log(d)
-
-            # Connection이 열려있을 경우 닫는다.
-            if conn.open:
-                conn.close()
+    except Exception as e:
+        Write_error_log.write_log(return_location(), str(e))
 
 
 def return_ox_msg(conn, keyword):
@@ -50,15 +35,15 @@ def return_ox_msg(conn, keyword):
     query = "SELECT num, answer, problem FROM Problem WHERE problem LIKE '%{}%' AND addtime < '{}'".format(keyword, string)
     curs.execute(query)
     rows = curs.fetchall()
+    conn.close()
 
-    if len(rows) > 30:
-        return too_many_result()
-
-    msg = "\"{}\"에 대한 검색 결과: {}개".format(keyword, len(rows))
     if len(rows) == 0:
-        msg += "\n제보는 '!제보'"
-        conn.close()
+        msg = "\"{}\"에 대한 검색 결과가 없습니다.\n제보는 '!제보'".format(keyword)
         return msg
+    elif len(rows) > 30:
+        return too_many_result()
+    else:
+         msg = "\"{}\"에 대한 검색 결과: {}개".format(keyword, len(rows))
 
     msg_list = []
     for i in rows:
@@ -70,7 +55,6 @@ def return_ox_msg(conn, keyword):
     for i in msg_list:
         msg += i
 
-    conn.close()
     return msg
 
 
@@ -78,21 +62,21 @@ def get_query_result(keyword):
     try:
         conn = public_SQL.make_connection()
         msg = return_ox_msg(conn, keyword)
-        conn.close()
-        time.sleep(random.randrange(0, 3))
+        if conn.open:
+            conn.close()
         return msg
 
     except:
         try:
             conn = public_SQL.make_backupconnection()
             msg = return_ox_msg(conn, keyword)
-            conn.close()
+            if conn.open:
+                conn.close()
             return msg
 
         except Exception as e:
-            Write_error_log.write_log(e)
+            Write_error_log.write_log(return_location(), str(e))
             msg = "서버 이상으로 데이터를 갖고 올 수 없습니다."
-
             return msg
 
 
@@ -120,18 +104,16 @@ def get_boss(keyword):
     try:
         conn = public_SQL.make_connection()
         msg = return_boss_msg(keyword, conn)
-        conn.close()
         return msg
 
     except:
         try:
             conn = public_SQL.make_backupconnection()
             msg = return_boss_msg(keyword, conn)
-            conn.close()
             return msg
 
         except Exception as e:
-            Write_error_log.write_log(e)
+            Write_error_log.write_log(return_location(), str(e))
             msg = "서버 이상으로 데이터를 갖고 올 수 없습니다."
             return msg
 
@@ -154,19 +136,19 @@ def get_custom_query(message):
     try:
         conn = public_SQL.make_connection()
         msg = return_custom_msg(message, conn)
-        conn.close()
-
+        if conn.open:
+            conn.close()
         return msg
 
     except:
         try:
             conn = public_SQL.make_backupconnection()
             msg = return_custom_msg(message, conn)
-            conn.close()
-
+            if conn.open:
+                conn.close()
             return msg
 
         except Exception as e:
-            Write_error_log.write_log(e)
+            Write_error_log.write_log(return_location(), str(e))
             return "False"
 
