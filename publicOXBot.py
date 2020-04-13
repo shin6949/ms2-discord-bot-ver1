@@ -51,15 +51,6 @@ async def on_message(message):
     if message.content.startswith('!ox 섹스') or message.content.startswith('!OX 섹스'):
         return None
 
-    if message.content.startswith('!ox 시발') or message.content.startswith('!OX 씨발'):
-        return None
-
-    if message.content.startswith('!ox 교미') or message.content.startswith('!OX 교미'):
-        return None
-
-    if message.content.startswith('!ox 성교') or message.content.startswith('!OX 성교'):
-        return None
-
     if message.content.startswith("!연산 "):
         channel = message.channel
 
