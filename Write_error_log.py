@@ -4,10 +4,8 @@ from datetime import datetime
 def write_log(commit):
     try:
         logfile = open("./error.txt", 'a')
-        logfile.write(str(datetime.now()))
-        logfile.write("\n")
-        logfile.write(commit)
-        logfile.write("\n")
+        error_msg = "{}\n{}\n".format(str(datetime.now()), commit)
+        logfile.write(error_msg)
         logfile.close()
         return True
 
