@@ -117,7 +117,6 @@ class chatbot(discord.Client):
             now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
             msg = "현재 시간은 " + string + " 입니다. (GMT+9)"
             await channel.send(msg)
-            inner_query.log_upload("Other", message.content, message.author)
             return None
 
         if message.content.startswith("!연산 "):
@@ -137,7 +136,6 @@ class chatbot(discord.Client):
                 msg = '"{}"의 연산 결과\n{}'.format(cal, "올바른 식을 입력하지 않아 계산이 되지 않았습니다.")
 
             await channel.send(msg)
-            inner_query.log_upload("QueryLog", message.content, message.author)
             return None
 
         # 미니게임 시간표
@@ -151,7 +149,6 @@ class chatbot(discord.Client):
 
             msg = Mini.get_recent_minigame()
             await channel.send(msg)
-            inner_query.log_upload("Other", message.content, message.author)
             return None
 
         # OX 퀴즈 검색하기
@@ -159,7 +156,6 @@ class chatbot(discord.Client):
             channel = message.channel
             msg = "입력한 키워드가 없습니다!!"
             await channel.send(msg)
-            inner_query.log_upload("QueryLog", message.content, message.author)
             return None
 
         if message.content.startswith('!ox ') or message.content.startswith('!OX ') or message.content.startswith(
@@ -180,12 +176,10 @@ class chatbot(discord.Client):
                 if len(keyword) < 2:
                     msg = "검색어는 2글자 이상 입력해주세요."
                     await channel.send(msg)
-                    inner_query.log_upload("QueryLog", message.content, message.author)
                     return None
 
                 msg = inner_query.get_query_result(keyword, message, start)
                 await channel.send(msg)
-                inner_query.log_upload("QueryLog", message.content, message.author)
                 return None
 
             except Exception as e:
@@ -212,7 +206,6 @@ class chatbot(discord.Client):
             try:
                 msg = inner_query.get_boss(keyword, message, start)
                 await channel.send(msg)
-                inner_query.log_upload("Other", message.content, message.author)
                 return None
 
             except Exception as e:
@@ -230,14 +223,12 @@ class chatbot(discord.Client):
             if message.content == "!길트" or message.content == "!길트 ":
                 msg = get_ranking.get_guild_ranking("realtime")
                 await channel.send(msg)
-                inner_query.log_upload("Other", message.content, message.author)
                 return None
 
             if message.content == "!길트종" or message.content == "!길트종 ":
                 msg = get_ranking.get_guild_ranking("None") \
                       + "-이 순위는 종합 순위로 하루에 한번 업데이트 됩니다.-"
                 await channel.send(msg)
-                inner_query.log_upload("Other", message.content, message.author)
                 return None
 
             if not message.content.find("!길트종") == -1:
@@ -247,7 +238,6 @@ class chatbot(discord.Client):
                 if str(type(guild_list)) == "<class 'str'>":
                     msg = guild_list
                     await channel.send(msg)
-                    inner_query.log_upload("Other", message.content, message.author)
                     return None
 
                 guild_list[0]['guildmsg'] += "-이 순위는 종합 순위로 하루에 한번 업데이트 됩니다.-"
@@ -257,7 +247,6 @@ class chatbot(discord.Client):
 
                 msg = guild_list[0]['guildmsg']
                 await channel.send(msg)
-                inner_query.log_upload("Other", message.content, message.author)
                 return None
 
             keyword = message.content.replace("!길트 ", "", 1)
@@ -266,7 +255,6 @@ class chatbot(discord.Client):
             if str(type(guild_list)) == "<class 'str'>":
                 msg = guild_list
                 await channel.send(msg)
-                inner_query.log_upload("Other", message.content, message.author)
                 return None
 
             urllib.request.urlretrieve(guild_list[0]['imgurl'], guild_list[0]['name'] + ".png")
@@ -274,7 +262,6 @@ class chatbot(discord.Client):
 
             msg = guild_list[0]['guildmsg']
             await channel.send(msg)
-            inner_query.log_upload("Other", message.content, message.author)
             return None
 
         if message.content.startswith("!개트"):
@@ -288,14 +275,12 @@ class chatbot(discord.Client):
             if message.content == "!개트" or message.content == "!개트 ":
                 msg = get_ranking.get_person_ranking("realtime")
                 await channel.send(msg)
-                inner_query.log_upload("Other", message.content, message.author)
                 return None
 
             if message.content == "!개트종" or message.content == "!개트종 ":
                 msg = get_ranking.get_person_ranking("None") \
                       + "\n-이 순위는 종합 순위로 하루에 한번 업데이트 됩니다.-"
                 await channel.send(msg)
-                inner_query.log_upload("Other", message.content, message.author)
                 return None
 
             if not message.content.find("!개트종") == -1:
@@ -305,7 +290,6 @@ class chatbot(discord.Client):
                 if str(type(person_list)) == "<class 'str'>":
                     msg = person_list
                     await channel.send(msg)
-                    inner_query.log_upload("Other", message.content, message.author)
                     return None
 
                 person_list[0]['personmsg'] += "-이 순위는 종합 순위로 하루에 한번 업데이트 됩니다.-"
@@ -315,7 +299,6 @@ class chatbot(discord.Client):
 
                 msg = person_list[0]['personmsg']
                 await channel.send(msg)
-                inner_query.log_upload("Other", message.content, message.author)
                 return None
 
             keyword = message.content.replace("!개트 ", "", 1)
@@ -324,7 +307,6 @@ class chatbot(discord.Client):
             if str(type(person_list)) == "<class 'str'>":
                 msg = person_list
                 await channel.send(msg)
-                inner_query.log_upload("Other", message.content, message.author)
                 return None
 
             urllib.request.urlretrieve(person_list[0]['imgurl'], person_list[0]['name'] + ".png")
@@ -332,7 +314,6 @@ class chatbot(discord.Client):
 
             msg = person_list[0]['personmsg']
             await channel.send(msg)
-            inner_query.log_upload("Other", message.content, message.author)
             return None
 
         if message.content == "!설정":
@@ -428,7 +409,6 @@ class chatbot(discord.Client):
 
             if not msg == "False":
                 await channel.send(msg)
-                inner_query.log_upload("Other", message.content, message.author)
                 return None
             else:
                 return None

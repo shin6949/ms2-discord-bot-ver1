@@ -1,6 +1,9 @@
 import pymysql
 import datetime
 
+# 외부 파일
+import Write_error_log
+
 
 def backup_db():
     try:
@@ -9,7 +12,7 @@ def backup_db():
         backup_conn = pymysql.connect(host='{DB_HOST}', user='{DB_USER}', password='{DB_PASSWORD}', db='MS2OX',
                                       charset='utf8mb4')
     except Exception as e:
-        print(e)
+        Write_error_log.write_log(e)
         return False
 
     # 전날 오전 5시를 지정
@@ -29,8 +32,8 @@ def backup_db():
             curs.execute(query, (data["usetime"], data["user"], data["user_id"], data["type"], data["chat"],
                                  data["respond"], data["Server"], data["SeverID"], data["ChannelName"]))
             backup_conn.commit()
-        except:
-            pass
+        except Exception as e:
+            Write_error_log.write_log(e)
 
     # 한달전 5시를 지정
     month = (datetime.datetime.now() + datetime.timedelta(days=-30)).strftime('%Y-%m-%d 05:00:00')
@@ -40,10 +43,11 @@ def backup_db():
         query = "DELETE FROM PublicVerLog WHERE usetime < '{}'".format(str(month))
         curs.execute(query)
         main_conn.commit()
-    except:
-        pass
+    except Exception as e:
+        Write_error_log.write_log(e)
 
     main_conn.close()
     backup_conn.close()
 
     return True
+

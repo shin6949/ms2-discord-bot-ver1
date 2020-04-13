@@ -5,33 +5,11 @@ import pymysql
 
 # 별도 파일
 import SQL
+import Write_error_log
 
 
 def too_many_result():
     return "검색 결과가 30개가 넘어요!\n디스코드 내 최대 글자수 제한이 있어서 결과를 표시 할 수 없습니다. 좀 더 길게 검색해보세요."
-
-
-def log_upload(table, message, author):
-    try:
-        conn = SQL.make_connection()
-        backupconn = SQL.make_backupconnection()
-
-        curs = conn.cursor()
-        query = "insert into {} values (now(), %s, %s)".format(table)
-        curs.execute(query, (str(message), str(author)))
-        conn.commit()
-
-        backupcursor = backupconn.cursor()
-        query = "insert into {} values (now(), %s, %s)".format(table)
-        backupcursor.execute(query, (str(message), str(author)))
-        backupconn.commit()
-
-        conn.close()
-        backupconn.close()
-
-    except Exception as e:
-        print(e)
-        pass
 
 
 def return_ox_msg(conn, keyword, message, start):
@@ -53,7 +31,7 @@ def return_ox_msg(conn, keyword, message, start):
         elif i['answer'] == 1:
             msg_list.append("```ini\n[O] {}\n```".format(i['problem']))
 
-    if str(message.author) == "COCOBLUE#7709":
+    if str(message.author.id) == "{DEVELOPER_USER_ID}":
         msg_list.append("\n연산 시간: {}".format(str(time.time() - start)))
 
     for i in msg_list:
@@ -72,14 +50,15 @@ def get_query_result(keyword, message, start):
 
         return msg
 
-    except Exception as e:
+    except:
         try:
             conn = SQL.make_backupconnection()
             msg = return_ox_msg(conn, keyword, message, start)
 
             return msg
 
-        except:
+        except Exception as e:
+            Write_error_log.write_log(e)
             msg = "서버 이상으로 데이터를 갖고 올 수 없습니다."
             return msg
 
@@ -117,14 +96,15 @@ def get_boss(keyword, message, start):
 
         return msg
 
-    except Exception as e:
+    except:
         try:
             conn = SQL.make_backupconnection()
             msg = return_boss_msg(conn, keyword, message, start)
 
             return msg
 
-        except:
+        except Exception as e:
+            Write_error_log.write_log(e)
             msg = "서버 이상으로 데이터를 갖고 올 수 없습니다."
             return msg
 
@@ -140,8 +120,6 @@ def return_custom_msg(conn, message):
     else:
         msg = "False"
 
-    conn.commit()
-    conn.close()
     return msg
 
 
@@ -149,17 +127,18 @@ def get_custom_query(message):
     try:
         conn = SQL.make_connection()
         msg = return_custom_msg(conn, message)
-
+        conn.close()
         return msg
 
-    except Exception as e:
+    except:
         try:
             conn = SQL.make_backupconnection()
             msg = return_custom_msg(conn, message)
-
+            conn.close()
             return msg
-        except:
-            print(e)
+
+        except Exception as e:
+            Write_error_log.write_log(e)
             return "False"
 
 
@@ -177,7 +156,7 @@ def get_chat(keyword):
 
         rows = curs.fetchall()
 
-        list = []
+        chatlist = []
         for i in range(len(rows) - 1, -1, -1):
             tmp = ""
             tmp += "```[" + rows[i]['serverdate'].strftime("%Y.%m.%d. %H:%M ")
@@ -202,16 +181,13 @@ def get_chat(keyword):
 
             tmp += "\'{}\'의 채팅\n{}```".format(rows[i]['author'], rows[i]['comment'])
 
-            print(tmp)
+            chatlist.append(tmp)
 
-            list.append(tmp)
-
-        print(len(list))
         conn.commit()
         conn.close()
 
-        return list
+        return chatlist
 
     except Exception as e:
-        print(e)
+        Write_error_log.write_log(e)
         return "False"
