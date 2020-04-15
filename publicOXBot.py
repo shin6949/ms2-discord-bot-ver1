@@ -1,8 +1,13 @@
-import re
+import time
+
 import discord
 
+import Calculator
 # 별도 파일들
 import Mini
+import OX_Quiz_Result
+import Offer_Process_Time
+import get_Boss
 import publicJudgeBan
 import public_query
 
@@ -29,6 +34,7 @@ async def on_ready():
 # message respond
 @client.event
 async def on_message(message):
+    start = time.time()
     # sender가 bot일 경우 ignore
     if message.author.bot:
         return None
@@ -39,6 +45,7 @@ async def on_message(message):
 
         channel = message.channel
         msg = "입력한 키워드가 없습니다."
+        msg = Offer_Process_Time.configure(start, msg, message)
         await channel.send(msg, delete_after=10.0)
         public_query.log_upload(message, "ox", msg)
         return None
@@ -53,14 +60,8 @@ async def on_message(message):
         if publicJudgeBan.judge(message):
             return None
 
-        cal = message.content.replace("!연산 ", "")
-        python_cal = cal.replace("x", "*").replace("X", "*").replace("÷", "/")
-
-        try:
-            msg = '"{}"의 연산 결과\n{}'.format(cal, eval(python_cal))
-        except:
-            msg = '"{}"의 연산 결과\n{}'.format(cal, "올바른 식을 입력하지 않아 계산이 되지 않았습니다.")
-
+        msg = Calculator.cal(message, "Public")
+        msg = Offer_Process_Time.configure(start, msg, message)
         await channel.send(msg, delete_after=60.0)
         public_query.log_upload(message, "calculator", msg)
         return None
@@ -69,27 +70,14 @@ async def on_message(message):
     if message.content.startswith('!ox ') or message.content.startswith('!OX '):
         if publicJudgeBan.judge(message):
             return None
-
         channel = message.channel
 
-        try:
-            keyword = message.content.replace("!ox ", "", 1).replace("!OX ", "", 1)
-
-            if len(keyword) < 2:
-                msg = "검색어는 2글자 이상 입력해주세요."
-                await channel.send(msg, delete_after=10.0)
-                public_query.log_upload(message, "ox", msg)
-                return None
-
-            msg = public_query.get_query_result(keyword)
-            await channel.send(msg, delete_after=60.0)
-            # user, type, chat, respond
-            public_query.log_upload(message, "ox", msg)
-            return None
-
-        except Exception as e:
-            print(e)
-            return None
+        msg = OX_Quiz_Result.get(message, "Public")
+        msg = Offer_Process_Time.configure(start, msg, message)
+        await channel.send(msg, delete_after=60.0)
+        # user, type, chat, respond
+        public_query.log_upload(message, "ox", msg)
+        return None
 
     # 필보 검색
     if message.content.startswith("!필보"):
@@ -98,21 +86,11 @@ async def on_message(message):
 
         channel = message.channel
 
-        if message.content == "!필보":
-            await channel.send("키워드를 입력해주세요. (ex. !필보 5)")
-            return None
-
-        keyword = re.findall('\d+', message.content)[0]
-
-        try:
-            msg = public_query.get_boss(keyword)
-            await channel.send(msg, delete_after=60.0)
-            public_query.log_upload(message, "boss", msg)
-            return None
-
-        except Exception as e:
-            print(e)
-            return None
+        msg = get_Boss.get(message, "Public")
+        msg = Offer_Process_Time.configure(start, msg, message)
+        await channel.send(msg, delete_after=60.0)
+        public_query.log_upload(message, "boss", msg)
+        return None
 
     # 미니게임 시간표
     if message.content == "!미겜":
@@ -122,6 +100,7 @@ async def on_message(message):
         channel = message.channel
 
         msg = Mini.get_recent_minigame()
+        msg = Offer_Process_Time.configure(start, msg, message)
         await channel.send(msg, delete_after=60.0)
         public_query.log_upload(message, "Minigame", msg)
         return None
@@ -135,6 +114,7 @@ async def on_message(message):
         msg = public_query.get_custom_query(message)
 
         if not msg == "False":
+            msg = Offer_Process_Time.configure(start, msg, message)
             await channel.send(msg, delete_after=60.0)
             public_query.log_upload(message, "CustomRespond", msg)
             return None

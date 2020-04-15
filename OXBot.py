@@ -1,21 +1,27 @@
-import re
+import time
+import threading
 import time
 import urllib.request
-import schedule
-import discord
 from pprint import pprint
-import threading
 
-# ë³„ë„ ?ŒŒ?¼
+import discord
+import schedule
+
+import Backup_Task
+import Calculator
+# ë³„ë„ íŒŒì¼
 import Mini
+import OX_Quiz_Result
+import Offer_Process_Time
+import Write_error_log
+import get_Boss
 import get_ranking
 import get_tts_mp3
 import inner_query
-import Backup_Task
-import Write_error_log
 
 
-# ë©”ì½©OXë´?#5381
+# ë©”ì½©OXë´‡#5381
+
 
 def return_location():
     return "GuildOXBot - OXBot.py"
@@ -27,9 +33,9 @@ def where_user_in(message):
 
     for i in guild_voice_list:
         for j in range(len(i.members)):
-            # i ì±„ë„?— ?œ ??ê°? ?ˆ?œ¼ë©?
+            # i ì±„ë„ì— ìœ ì €ê°€ ìˆìœ¼ë©´
             if str(i.members[j].id) == str(user_id):
-                # ?œ ??ê°? ?ˆ?Š” ë³´ì´?Š¤ ì±„ë„?„ ë¦¬í„´
+                # ìœ ì €ê°€ ìˆëŠ” ë³´ì´ìŠ¤ ì±„ë„ì„ ë¦¬í„´
                 return i
 
     return "False"
@@ -38,29 +44,31 @@ def where_user_in(message):
 def judge_server(message):
     try:
         if not str(message.guild.id) == "{DISCORD_SERVER_ID}" and not str(message.guild.id) == "{DISCORD_SERVER_ID}":
-            msg = "?´ ë´‡ì? ì§?? •?œ ?„œë²„ì—?„œë§? ?‚¬?š©?•˜?‹¤ ?ˆ˜ ?ˆ?Šµ?‹ˆ?‹¤."
+            msg = "ì´ ë´‡ì€ ì§€ì •ëœ ì„œë²„ì—ì„œë§Œ ì‚¬ìš©í•˜ì‹¤ ìˆ˜ ìˆìŠµë‹ˆë‹¤."
             return msg
         else:
             return "True"
 
     except:
-        msg = "?´ ë´‡ì? DM ëª¨ë“œë¡œëŠ” ?‚¬?š©?•˜?‹¤ ?ˆ˜ ?—†?Šµ?‹ˆ?‹¤."
+        msg = "ì´ ë´‡ì€ DM ëª¨ë“œë¡œëŠ” ì‚¬ìš©í•˜ì‹¤ ìˆ˜ ì—†ìŠµë‹ˆë‹¤."
         return msg
 
 
 class chatbot(discord.Client):
     async def on_ready(self):
-        game = discord.Game("!?„¤ëª…ì„œ, !?…‹?œ¼ë¡? ë¬¸ì œ ê²??ƒ‰")
+        game = discord.Game("!ì„¤ëª…ì„œ, !ã…‹ìœ¼ë¡œ ë¬¸ì œ ê²€ìƒ‰")
         await client.change_presence(status=discord.Status.online, activity=game)
         print("READY")
 
     async def on_message(self, message):
+        start = time.time()
+
         if message.content.startswith("\"\" "):
             channel = message.channel
             voice_channel = where_user_in(message)
 
             if voice_channel == "False":
-                await channel.send('?“¤?–´ê°? ?ˆ?Š” ë³´ì´?Š¤ ì±„ë„?´ ?—†?Šµ?‹ˆ?‹¤.', delete_after=10.0)
+                await channel.send('ë“¤ì–´ê°€ ìˆëŠ” ë³´ì´ìŠ¤ ì±„ë„ì´ ì—†ìŠµë‹ˆë‹¤.', delete_after=10.0)
                 get_tts_mp3.upload_log(message)
                 return None
             else:
@@ -83,32 +91,32 @@ class chatbot(discord.Client):
                         return None
 
                     except:
-                        msg = "ë¨¼ì? ?š”ì²??•œ ë©”ì‹œì§?ë¥? ?¬?ƒ?•˜ê³? ?ˆ?Šµ?‹ˆ?‹¤."
+                        msg = "ë¨¼ì € ìš”ì²­í•œ ë©”ì‹œì§€ë¥¼ ì¬ìƒí•˜ê³  ìˆìŠµë‹ˆë‹¤."
                         await channel.send(msg, delete_after=10.0)
                         get_tts_mp3.upload_log(message)
                         return None
                 else:
-                    msg = "?„œë²? ë¬¸ì œë¡? ?¸?•´ TTS êµ¬ì„±?— ?‹¤?Œ¨?•˜???Šµ?‹ˆ?‹¤."
+                    msg = "ì„œë²„ ë¬¸ì œë¡œ ì¸í•´ TTS êµ¬ì„±ì— ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤."
                     await channel.send(msg, delete_after=10.0)
                     get_tts_mp3.upload_log(message)
                     return None
 
-        if (len(client.voice_clients) > 0) and (not message.content == "!?‚˜ê°?ê¸?"):
+        if (len(client.voice_clients) > 0) and (not message.content == "!ë‚˜ê°€ê¸°"):
             if get_tts_mp3.get_recent_use():
                 channel = message.channel
                 voice_list = client.voice_clients
                 await voice_list[0].disconnect(force=True)
-                await channel.send("30ë¶? ?´?ƒ ?‚¬?š©?•˜ì§? ?•Š?•„ ?‚˜ê°”ìŠµ?‹ˆ?‹¤.", delete_after=120.0)
+                await channel.send("30ë¶„ ì´ìƒ ì‚¬ìš©í•˜ì§€ ì•Šì•„ ë‚˜ê°”ìŠµë‹ˆë‹¤.", delete_after=120.0)
 
-        if not str(message.author) == "ë©”ì½©ë´?#5381":
+        if not str(message.author) == "ë©”ì½©ë´‡#5381":
             pass
 
-        # senderê°? bot?¼ ê²½ìš° ignore
+        # senderê°€ botì¼ ê²½ìš° ignore
         if message.author.bot:
             return None
 
-        # ?‹œê°?
-        if message.content == '!?‹œê°?' or message.content == "!time" or message.content == "!TIME":
+        # ì‹œê°„
+        if message.content == '!ì‹œê°„' or message.content == "!time" or message.content == "!TIME":
             channel = message.channel
 
             judge = judge_server(message)
@@ -117,139 +125,119 @@ class chatbot(discord.Client):
                 return None
 
             now = time.localtime()
-            string = "%04d?…„ %02d?›” %02d?¼ %02d?‹œ %02dë¶? %02dì´?" % (
-            now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
-            msg = "?˜„?¬ ?‹œê°„ì? " + string + " ?…?‹ˆ?‹¤. (GMT+9)"
+            string = "%04dë…„ %02dì›” %02dì¼ %02dì‹œ %02dë¶„ %02dì´ˆ" % (
+                now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+            msg = "í˜„ì¬ ì‹œê°„ì€ {} ì…ë‹ˆë‹¤. (GMT+9)".format(string)
+            msg = Offer_Process_Time.configure(start, msg, message)
             await channel.send(msg)
             return None
 
-        if message.content.startswith("!?—°?‚° "):
+        if message.content.startswith("!ì—°ì‚° "):
             channel = message.channel
-
             judge = judge_server(message)
+
             if not judge == "True":
+                judge = Offer_Process_Time.configure(start, judge, message)
                 await channel.send(judge)
                 return None
 
-            cal = message.content.replace("!?—°?‚° ", "")
-            python_cal = cal.replace("x", "*").replace("X", "*").replace("Ã·", "/")
-
-            try:
-                msg = '"{}"?˜ ?—°?‚° ê²°ê³¼\n{}'.format(cal, eval(python_cal))
-            except:
-                msg = '"{}"?˜ ?—°?‚° ê²°ê³¼\n{}'.format(cal, "?˜¬ë°”ë¥¸ ?‹?„ ?…? ¥?•˜ì§? ?•Š?•„ ê³„ì‚°?´ ?˜ì§? ?•Š?•˜?Šµ?‹ˆ?‹¤.")
-
+            msg = Calculator.cal(message, "Guild")
+            msg = Offer_Process_Time.configure(start, msg, message)
             await channel.send(msg)
             return None
 
-        # ë¯¸ë‹ˆê²Œì„ ?‹œê°„í‘œ
+        # ë¯¸ë‹ˆê²Œì„ ì‹œê°„í‘œ
         if message.content == "!ë¯¸ê²œ":
             channel = message.channel
 
             judge = judge_server(message)
             if not judge == "True":
+                judge = Offer_Process_Time.configure(start, judge, message)
                 await channel.send(judge)
                 return None
 
             msg = Mini.get_recent_minigame()
+            msg = Offer_Process_Time.configure(start, msg, message)
             await channel.send(msg)
             return None
 
-        # OX ?´ì¦ˆ ê²??ƒ‰?•˜ê¸?
-        if message.content == '!ox' or message.content == '!OX' or message.content == '!?´ì¦ˆ' or message.content == '!?…‹' or message.content == '!q':
+        # OX í€´ì¦ˆ ê²€ìƒ‰í•˜ê¸°
+        if message.content == '!ox' or message.content == '!OX' or message.content == '!í€´ì¦ˆ' or message.content == '!ã…‹' or message.content == '!q':
             channel = message.channel
-            msg = "?…? ¥?•œ ?‚¤?›Œ?“œê°? ?—†?Šµ?‹ˆ?‹¤!!"
+            msg = "ì…ë ¥í•œ í‚¤ì›Œë“œê°€ ì—†ìŠµë‹ˆë‹¤!!"
+            msg = Offer_Process_Time.configure(start, msg, message)
             await channel.send(msg)
             return None
 
         if message.content.startswith('!ox ') or message.content.startswith('!OX ') or message.content.startswith(
-                '!?´ì¦ˆ ') or message.content.startswith('!?…‹ ') or message.content.startswith('!q '):
+                '!í€´ì¦ˆ ') or message.content.startswith('!ã…‹ ') or message.content.startswith('!q '):
             channel = message.channel
 
             judge = judge_server(message)
             if not judge == "True":
+                judge = Offer_Process_Time.configure(start, judge, message)
                 await channel.send(judge)
                 return None
 
-            start = time.time()
+            msg = OX_Quiz_Result.get(message, "Guild")
+            msg = Offer_Process_Time.configure(start, msg, message)
+            await channel.send(msg)
+            return None
 
-            try:
-                keyword = message.content.replace("!ox ", "", 1).replace("!OX ", "", 1).replace("!?´ì¦ˆ ", "", 1).replace(
-                    "!?…‹ ", "", 1).replace("!q ", "", 1).lstrip().rstrip()
-
-                if len(keyword) < 2:
-                    msg = "ê²??ƒ‰?–´?Š” 2ê¸?? ?´?ƒ ?…? ¥?•´ì£¼ì„¸?š”."
-                    await channel.send(msg)
-                    return None
-
-                msg = inner_query.get_query_result(keyword, message, start)
-                await channel.send(msg)
-                return None
-
-            except Exception as e:
-                Write_error_log.write_log(return_location(), str(e))
-                return None
-
-        # ?•„ë³? ê²??ƒ‰
-        if message.content.startswith("!?•„ë³?"):
+        # í•„ë³´ ê²€ìƒ‰
+        if message.content.startswith("!í•„ë³´"):
             channel = message.channel
 
             judge = judge_server(message)
             if not judge == "True":
+                judge = Offer_Process_Time.configure(start, judge, message)
                 await channel.send(judge)
                 return None
 
-            start = time.time()
-
-            if message.content == "!?•„ë³?":
-                await channel.send("?‚¤?›Œ?“œë¥? ?…? ¥?•´ì£¼ì„¸?š”. (ex. !?•„ë³? 5)")
-                return None
-
-            keyword = re.findall('\d+', message.content)[0]
-
-            try:
-                msg = inner_query.get_boss(keyword, message, start)
-                await channel.send(msg)
-                return None
-
-            except Exception as e:
-                Write_error_log.write_log(return_location(), str(e))
-                return None
+            msg = get_Boss.get(message, "Guild")
+            msg = Offer_Process_Time.configure(start, msg, message)
+            await channel.send(msg)
+            return None
 
         if message.content.startswith("!ê¸¸íŠ¸"):
             channel = message.channel
 
             judge = judge_server(message)
             if not judge == "True":
+                judge = Offer_Process_Time.configure(start, judge, message)
                 await channel.send(judge)
                 return None
 
             if message.content == "!ê¸¸íŠ¸" or message.content == "!ê¸¸íŠ¸ ":
                 msg = get_ranking.get_guild_ranking("realtime")
+                msg = Offer_Process_Time.configure(start, msg, message)
                 await channel.send(msg)
                 return None
 
-            if message.content == "!ê¸¸íŠ¸ì¢?" or message.content == "!ê¸¸íŠ¸ì¢? ":
+            if message.content == "!ê¸¸íŠ¸ì¢…" or message.content == "!ê¸¸íŠ¸ì¢… ":
                 msg = get_ranking.get_guild_ranking("None") \
-                      + "-?´ ?ˆœ?œ„?Š” ì¢…í•© ?ˆœ?œ„ë¡? ?•˜ë£¨ì— ?•œë²? ?—…?°?´?Š¸ ?©?‹ˆ?‹¤.-"
+                      + "-ì´ ìˆœìœ„ëŠ” ì¢…í•© ìˆœìœ„ë¡œ í•˜ë£¨ì— í•œë²ˆ ì—…ë°ì´íŠ¸ ë©ë‹ˆë‹¤.-"
+                msg = Offer_Process_Time.configure(start, msg, message)
                 await channel.send(msg)
                 return None
 
-            if not message.content.find("!ê¸¸íŠ¸ì¢?") == -1:
-                keyword = message.content.replace("!ê¸¸íŠ¸ì¢? ", "", 1)
+            if not message.content.find("!ê¸¸íŠ¸ì¢…") == -1:
+                keyword = message.content.replace("!ê¸¸íŠ¸ì¢… ", "", 1)
                 guild_list = get_ranking.get_guild_ranking_search_by_keyword("None", keyword)
 
                 if str(type(guild_list)) == "<class 'str'>":
                     msg = guild_list
+                    msg = Offer_Process_Time.configure(start, msg, message)
                     await channel.send(msg)
                     return None
 
-                guild_list[0]['guildmsg'] += "-?´ ?ˆœ?œ„?Š” ì¢…í•© ?ˆœ?œ„ë¡? ?•˜ë£¨ì— ?•œë²? ?—…?°?´?Š¸ ?©?‹ˆ?‹¤.-"
+                guild_list[0]['guildmsg'] += "-ì´ ìˆœìœ„ëŠ” ì¢…í•© ìˆœìœ„ë¡œ í•˜ë£¨ì— í•œë²ˆ ì—…ë°ì´íŠ¸ ë©ë‹ˆë‹¤.-"
 
                 urllib.request.urlretrieve(guild_list[0]['imgurl'], guild_list[0]['name'] + ".png")
                 await channel.send(file=discord.File(guild_list[0]['name'] + ".png"))
 
                 msg = guild_list[0]['guildmsg']
+                msg = Offer_Process_Time.configure(start, msg, message)
                 await channel.send(msg)
                 return None
 
@@ -258,6 +246,7 @@ class chatbot(discord.Client):
 
             if str(type(guild_list)) == "<class 'str'>":
                 msg = guild_list
+                msg = Offer_Process_Time.configure(start, msg, message)
                 await channel.send(msg)
                 return None
 
@@ -265,6 +254,7 @@ class chatbot(discord.Client):
             await channel.send(file=discord.File(guild_list[0]['name'] + ".png"))
 
             msg = guild_list[0]['guildmsg']
+            msg = Offer_Process_Time.configure(start, msg, message)
             await channel.send(msg)
             return None
 
@@ -273,35 +263,40 @@ class chatbot(discord.Client):
 
             judge = judge_server(message)
             if not judge == "True":
+                judge = Offer_Process_Time.configure(start, judge, message)
                 await channel.send(judge)
                 return None
 
             if message.content == "!ê°œíŠ¸" or message.content == "!ê°œíŠ¸ ":
                 msg = get_ranking.get_person_ranking("realtime")
+                msg = Offer_Process_Time.configure(start, msg, message)
                 await channel.send(msg)
                 return None
 
-            if message.content == "!ê°œíŠ¸ì¢?" or message.content == "!ê°œíŠ¸ì¢? ":
+            if message.content == "!ê°œíŠ¸ì¢…" or message.content == "!ê°œíŠ¸ì¢… ":
                 msg = get_ranking.get_person_ranking("None") \
-                      + "\n-?´ ?ˆœ?œ„?Š” ì¢…í•© ?ˆœ?œ„ë¡? ?•˜ë£¨ì— ?•œë²? ?—…?°?´?Š¸ ?©?‹ˆ?‹¤.-"
+                      + "\n-ì´ ìˆœìœ„ëŠ” ì¢…í•© ìˆœìœ„ë¡œ í•˜ë£¨ì— í•œë²ˆ ì—…ë°ì´íŠ¸ ë©ë‹ˆë‹¤.-"
+                msg = Offer_Process_Time.configure(start, msg, message)
                 await channel.send(msg)
                 return None
 
-            if not message.content.find("!ê°œíŠ¸ì¢?") == -1:
-                keyword = message.content.replace("!ê°œíŠ¸ì¢? ", "", 1)
+            if not message.content.find("!ê°œíŠ¸ì¢…") == -1:
+                keyword = message.content.replace("!ê°œíŠ¸ì¢… ", "", 1)
                 person_list = get_ranking.get_person_ranking_search_by_keyword("realtime", keyword)
 
                 if str(type(person_list)) == "<class 'str'>":
                     msg = person_list
+                    msg = Offer_Process_Time.configure(start, msg, message)
                     await channel.send(msg)
                     return None
 
-                person_list[0]['personmsg'] += "-?´ ?ˆœ?œ„?Š” ì¢…í•© ?ˆœ?œ„ë¡? ?•˜ë£¨ì— ?•œë²? ?—…?°?´?Š¸ ?©?‹ˆ?‹¤.-"
+                person_list[0]['personmsg'] += "-ì´ ìˆœìœ„ëŠ” ì¢…í•© ìˆœìœ„ë¡œ í•˜ë£¨ì— í•œë²ˆ ì—…ë°ì´íŠ¸ ë©ë‹ˆë‹¤.-"
 
                 urllib.request.urlretrieve(person_list[0]['imgurl'], person_list[0]['name'] + ".png")
                 await channel.send(file=discord.File(person_list[0]['name'] + ".png"))
 
                 msg = person_list[0]['personmsg']
+                msg = Offer_Process_Time.configure(start, msg, message)
                 await channel.send(msg)
                 return None
 
@@ -310,6 +305,7 @@ class chatbot(discord.Client):
 
             if str(type(person_list)) == "<class 'str'>":
                 msg = person_list
+                msg = Offer_Process_Time.configure(start, msg, message)
                 await channel.send(msg)
                 return None
 
@@ -317,88 +313,93 @@ class chatbot(discord.Client):
             await channel.send(file=discord.File(person_list[0]['name'] + ".png"))
 
             msg = person_list[0]['personmsg']
+            msg = Offer_Process_Time.configure(start, msg, message)
             await channel.send(msg)
             return None
 
-        if message.content == "!?„¤? •":
+        if message.content == "!ì„¤ì •":
             channel = message.channel
-            embed = discord.Embed(title="?„¤? • ë°©ë²•",
-                                  description="\"!?„¤? • (???…)(?†?„)(ë³¼ë¥¨)(ë°˜ë§?—¬ë¶?)\"ë¡? ? œì¶œí•´ì£¼ì„¸?š”. (?„?–´?“°ê¸? ?—†?´!)\n?„¤? • ë³?ê²½ë„ ?™?¼?•©?‹ˆ?‹¤. ?´ ë©”ì‹œì§??Š” 120ì´? ?›„ ?‚­? œ?©?‹ˆ?‹¤.")
-            embed.add_field(name="???…", value="1: ?—¬?„± ì°¨ë¶„?•œ ?‚­?…ì²?\n2: ?‚¨?„± ì°¨ë¶„?•œ ?‚­?…ì²?\n3: ?—¬?„± ë°ì? ???™”ì²?\n4: ?‚¨?„± ë°ì? ???™”ì²?", inline=False)
-            embed.add_field(name="?†?„", value="1: ?Šë¦?\n2: ë³´í†µ\n3: ë¹ ë¦„", inline=False)
-            embed.add_field(name="ë³¼ë¥¨", value="1: 0.7ë°?\n2: 1.0ë°?\n3: 1.4ë°?", inline=False)
-            embed.add_field(name="ë°˜ë§ ?—¬ë¶? (\"?•ˆ?…•?•˜?„¸?š”\"?¼ê³? ?…? ¥?•´?„ \"?•ˆ?…•\"?´?¼ê³? ë§í•¨.)", value="1: ?„¤? • ?•ˆ?•¨\n2: ?„¤? •", inline=False)
-            embed.add_field(name="?„¤? • ?˜ˆ?‹œ", value="!?„¤? • 2221", inline=False)
+            embed = discord.Embed(title="ì„¤ì • ë°©ë²•",
+                                  description="\"!ì„¤ì • (íƒ€ì…)(ì†ë„)(ë³¼ë¥¨)(ë°˜ë§ì—¬ë¶€)\"ë¡œ ì œì¶œí•´ì£¼ì„¸ìš”. (ë„ì–´ì“°ê¸° ì—†ì´!)\nì„¤ì • ë³€ê²½ë„ ë™ì¼í•©ë‹ˆë‹¤. ì´ ë©”ì‹œì§€ëŠ” 120ì´ˆ í›„ ì‚­ì œë©ë‹ˆë‹¤.")
+            embed.add_field(name="íƒ€ì…", value="1: ì—¬ì„± ì°¨ë¶„í•œ ë‚­ë…ì²´\n2: ë‚¨ì„± ì°¨ë¶„í•œ ë‚­ë…ì²´\n3: ì—¬ì„± ë°ì€ ëŒ€í™”ì²´\n4: ë‚¨ì„± ë°ì€ ëŒ€í™”ì²´", inline=False)
+            embed.add_field(name="ì†ë„", value="1: ëŠë¦¼\n2: ë³´í†µ\n3: ë¹ ë¦„", inline=False)
+            embed.add_field(name="ë³¼ë¥¨", value="1: 0.7ë°°\n2: 1.0ë°°\n3: 1.4ë°°", inline=False)
+            embed.add_field(name="ë°˜ë§ ì—¬ë¶€ (\"ì•ˆë…•í•˜ì„¸ìš”\"ë¼ê³  ì…ë ¥í•´ë„ \"ì•ˆë…•\"ì´ë¼ê³  ë§í•¨.)", value="1: ì„¤ì • ì•ˆí•¨\n2: ì„¤ì •", inline=False)
+            embed.add_field(name="ì„¤ì • ì˜ˆì‹œ", value="!ì„¤ì • 2221", inline=False)
 
             await channel.send(embed=embed, delete_after=120.0)
             return None
 
-        if message.content.startswith("!?„¤? • "):
+        if message.content.startswith("!ì„¤ì • "):
             channel = message.channel
-            value = message.content.replace("!?„¤? • ", "", 1)
+            value = message.content.replace("!ì„¤ì • ", "", 1)
             try:
                 value_list = [int(value[0]) - 1, int(value[1]) - 1, int(value[2]) - 1, int(value[3]) - 1]
 
                 if not 0 <= int(value_list[0]) <= 3:
-                    msg = "?˜ëª? ?œ ???… ê°? ?…?‹ˆ?‹¤."
+                    msg = "ì˜ëª» ëœ íƒ€ì… ê°’ ì…ë‹ˆë‹¤."
                     await channel.send(msg, delete_after=10.0)
                     return None
 
                 if not 0 <= int(value_list[1]) <= 2:
-                    msg = "?˜ëª? ?œ ?†?„ ê°? ?…?‹ˆ?‹¤."
+                    msg = "ì˜ëª» ëœ ì†ë„ ê°’ ì…ë‹ˆë‹¤."
                     await channel.send(msg, delete_after=10.0)
                     return None
 
                 if not 0 <= int(value_list[2]) <= 2:
-                    msg = "?˜ëª? ?œ ë³¼ë¥¨ ê°? ?…?‹ˆ?‹¤."
+                    msg = "ì˜ëª» ëœ ë³¼ë¥¨ ê°’ ì…ë‹ˆë‹¤."
                     await channel.send(msg, delete_after=10.0)
                     return None
 
                 if not 0 <= int(value_list[3]) <= 1:
-                    msg = "?˜ëª? ?œ ë°˜ë§ ?—¬ë¶? ê°? ?…?‹ˆ?‹¤."
+                    msg = "ì˜ëª» ëœ ë°˜ë§ ì—¬ë¶€ ê°’ ì…ë‹ˆë‹¤."
                     await channel.send(msg, delete_after=10.0)
                     return None
 
                 if get_tts_mp3.upload_user_setting(message, value_list):
-                    msg = "?„¤? • ?™„ë£?!"
+                    msg = "ì„¤ì • ì™„ë£Œ!"
                     await channel.send(msg)
                     return None
 
                 else:
-                    msg = "?„œë²? ë¬¸ì œë¡? ?¸?•´ ?„¤? •?•˜ì§? ëª»í–ˆ?Šµ?‹ˆ?‹¤."
+                    msg = "ì„œë²„ ë¬¸ì œë¡œ ì¸í•´ ì„¤ì •í•˜ì§€ ëª»í–ˆìŠµë‹ˆë‹¤."
                     await channel.send(msg)
                     return None
 
             except:
-                msg = "?˜ëª? ?œ ê°’ì„ ?…? ¥?•˜?…¨?Šµ?‹ˆ?‹¤."
+                msg = "ì˜ëª» ëœ ê°’ì„ ì…ë ¥í•˜ì…¨ìŠµë‹ˆë‹¤."
                 await channel.send(msg)
                 return None
 
-        if message.content == "!?˜„?¬?„¤? •":
+        if message.content == "!í˜„ì¬ì„¤ì •":
             channel = message.channel
             now_setting = get_tts_mp3.configure_setting_text(message)
 
             if len(now_setting) == 0:
-                await channel.send('?„¤? • ê°’ì´ ?—†?Šµ?‹ˆ?‹¤.')
+                await channel.send('ì„¤ì • ê°’ì´ ì—†ìŠµë‹ˆë‹¤.')
                 return None
 
-            embed = discord.Embed(title="?˜„?¬ ?„¤? • (ì¹´ì¹´?˜¤ API)")
-            embed.add_field(name="???…", value=str(now_setting[0]), inline=False)
-            embed.add_field(name="?†?„", value=str(now_setting[1]), inline=False)
+            embed = discord.Embed(title="í˜„ì¬ ì„¤ì • (ì¹´ì¹´ì˜¤ API)")
+            embed.add_field(name="íƒ€ì…", value=str(now_setting[0]), inline=False)
+            embed.add_field(name="ì†ë„", value=str(now_setting[1]), inline=False)
             embed.add_field(name="ë³¼ë¥¨", value=str(now_setting[2]), inline=False)
-            embed.add_field(name="ë°˜ë§ ?—¬ë¶? (\"?•ˆ?…•?•˜?„¸?š”\"?¼ê³? ?…? ¥?•´?„ \"?•ˆ?…•\"?´?¼ê³? ë§í•¨.)", value=str(now_setting[3]), inline=False)
-            await channel.send("<@" + str(message.author.id) + "> ?‹˜?˜ ?˜„?¬ ?„¤? •?…?‹ˆ?‹¤.", embed=embed, delete_after=120.0)
+            embed.add_field(name="ë°˜ë§ ì—¬ë¶€ (\"ì•ˆë…•í•˜ì„¸ìš”\"ë¼ê³  ì…ë ¥í•´ë„ \"ì•ˆë…•\"ì´ë¼ê³  ë§í•¨.)", value=str(now_setting[3]), inline=False)
+            await channel.send("<@" + str(message.author.id) + "> ë‹˜ì˜ í˜„ì¬ ì„¤ì •ì…ë‹ˆë‹¤.", embed=embed, delete_after=120.0)
 
-        if message.content == "!?‚˜ê°?ê¸?":
+        if message.content == "!ë‚˜ê°€ê¸°":
             channel = message.channel
             voice_list = client.voice_clients
 
             if len(voice_list) == 0:
-                await channel.send('?“¤?–´ê°? ë³´ì´?Š¤ ì±„ë„?´ ?—†?Šµ?‹ˆ?‹¤.', delete_after=10.0)
+                msg = 'ë“¤ì–´ê°„ ë³´ì´ìŠ¤ ì±„ë„ì´ ì—†ìŠµë‹ˆë‹¤.'
+                msg = Offer_Process_Time.configure(start, msg, message)
+                await channel.send(msg, delete_after=10.0)
                 return None
             else:
+                msg = 'ë‚˜ê°€ê¸° ì™„ë£Œ'
+                msg = Offer_Process_Time.configure(start, msg, message)
                 await voice_list[0].disconnect(force=True)
-                await channel.send('?‚˜ê°?ê¸? ?™„ë£?', delete_after=10.0)
+                await channel.send(msg, delete_after=10.0)
                 return None
 
         if message.content.startswith("!"):
@@ -406,12 +407,14 @@ class chatbot(discord.Client):
 
             judge = judge_server(message)
             if not judge == "True":
+                judge = Offer_Process_Time.configure(start, judge, message)
                 await channel.send(judge)
                 return None
 
             msg = inner_query.get_custom_query(message)
 
             if not msg == "False":
+                msg = Offer_Process_Time.configure(start, msg, message)
                 await channel.send(msg)
                 return None
             else:

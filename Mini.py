@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
-import pymysql
-import SQL
 
+import pymysql
+
+import SQL
 # 별도 파일
 import Write_error_log
 
@@ -14,11 +15,11 @@ def get_recent_minigame():
     try:
         now = datetime.now() - timedelta(minutes=1)
         # string = "%02d:%02d:%02d" % (now.time().tm_hour, now.tm_min, now.tm_sec)
-        string = now.strftime('%H:%M:%S')
+        time_str = now.strftime('%H:%M:%S')
         conn = SQL.make_connection()
         curs = conn.cursor(pymysql.cursors.DictCursor)
-        query = "SELECT * FROM MiniGameTimeTable WHERE Time >= '" + str(string) + "' ORDER BY `Time` ASC"
-        curs.execute(query)
+        query = "SELECT * FROM MiniGameTimeTable WHERE Time >= %s ORDER BY `Time` ASC"
+        curs.execute(query, (str(time_str)))
         rows = curs.fetchall()
 
         if len(rows) == 0:
@@ -64,7 +65,7 @@ def get_recent_minigame():
 
         time_string = str(rows[0]['Time']).replace(":", "시 ", 1).replace("00", "", -1).replace(":", "분", -1)
 
-        msg = "제일 빠른 시간의 미니게임입니다.\n```시간: " + str(time_string) + "\n"
+        msg = "제일 빠른 시간의 미니게임입니다.\n```시간: {}\n".format(str(time_string))
 
         for i in minigame_list:
             msg += i + "\n"
