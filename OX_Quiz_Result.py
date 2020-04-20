@@ -19,6 +19,7 @@ def return_ox_msg(conn, keyword, mode):
     try:
         sql_keyword = keyword.replace("'", "''", keyword.count("'"))
         curs = conn.cursor(pymysql.cursors.DictCursor)
+        # TODO: 해설에 의한 검색 결과도 포함하는지 결정 필요
         query = "SELECT answer, problem FROM Problem WHERE problem LIKE '%{}%' OR comment LIKE '%{}%'".format(
             sql_keyword, sql_keyword)
         curs.execute(query)

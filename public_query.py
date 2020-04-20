@@ -48,6 +48,7 @@ def upload_log(query, content, respond):
     conn.close()
 
 
+# TODO: 익명 로그 기능 완성 필요 또한 로그 수집 거부 기능 완성해야함.
 def new_log_upload(message, querytype, respond, processtime):
     try:
         # QueryTime, User_id, Query, Respond, Query_type, Query_from, Server_id, ProcessTime

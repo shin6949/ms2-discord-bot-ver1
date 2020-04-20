@@ -1,5 +1,6 @@
-import pymysql
 import datetime
+
+import pymysql
 
 # 외부 파일
 import Write_error_log
@@ -9,6 +10,7 @@ def return_location():
     return "GuildOXBot - Backup_Task"
 
 
+# TODO 익명화 로그 대응 필요, 백업 서버도 30일 이후 삭제하도록 대응 필요
 def backup_db():
     try:
         main_conn = pymysql.connect(host='{DB_HOST}', user='{DB_USER}', password='{DB_PASSWORD}', db='MS2OX',
