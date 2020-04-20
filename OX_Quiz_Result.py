@@ -19,7 +19,8 @@ def return_ox_msg(conn, keyword, mode):
     try:
         sql_keyword = keyword.replace("'", "''", keyword.count("'"))
         curs = conn.cursor(pymysql.cursors.DictCursor)
-        query = "SELECT num, answer, problem FROM Problem WHERE problem LIKE '%{}%'".format(sql_keyword)
+        query = "SELECT answer, problem FROM Problem WHERE problem LIKE '%{}%' OR comment LIKE '%{}%'".format(
+            sql_keyword, sql_keyword)
         curs.execute(query)
         rows = curs.fetchall()
         conn.close()

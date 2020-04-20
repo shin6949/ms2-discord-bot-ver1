@@ -17,11 +17,11 @@ client = discord.Client()
 
 # BOT Token
 # Main Token = "{DISCORD_BOT_TOKEN}"
-token = "{DISCORD_BOT_TOKEN}"
+# token = "{DISCORD_BOT_TOKEN}"
 
 
 # Dev Token
-# token = "{DISCORD_BOT_TOKEN}"
+token = "{DISCORD_BOT_TOKEN}"
 
 # Bot initialize
 @client.event
@@ -47,11 +47,7 @@ async def on_message(message):
         msg = "입력한 키워드가 없습니다."
         msg = Offer_Process_Time.configure(start, msg, message)
         await channel.send(msg, delete_after=10.0)
-        public_query.log_upload(message, "ox", msg)
-        return None
-
-    # OX 저속 언어 필터링
-    if message.content.startswith('!ox 섹스') or message.content.startswith('!OX 섹스'):
+        public_query.log_upload(message, "ox", msg, str(time.time() - start))
         return None
 
     if message.content.startswith("!연산 "):
@@ -63,7 +59,7 @@ async def on_message(message):
         msg = Calculator.cal(message, "Public")
         msg = Offer_Process_Time.configure(start, msg, message)
         await channel.send(msg, delete_after=60.0)
-        public_query.log_upload(message, "calculator", msg)
+        public_query.log_upload(message, "calculator", msg, str(time.time() - start))
         return None
 
     # OX 퀴즈 검색하기
@@ -76,7 +72,7 @@ async def on_message(message):
         msg = Offer_Process_Time.configure(start, msg, message)
         await channel.send(msg, delete_after=60.0)
         # user, type, chat, respond
-        public_query.log_upload(message, "ox", msg)
+        public_query.log_upload(message, "ox", msg, str(time.time() - start))
         return None
 
     # 필보 검색
@@ -89,7 +85,7 @@ async def on_message(message):
         msg = get_Boss.get(message, "Public")
         msg = Offer_Process_Time.configure(start, msg, message)
         await channel.send(msg, delete_after=60.0)
-        public_query.log_upload(message, "boss", msg)
+        public_query.log_upload(message, "boss", msg, str(time.time() - start))
         return None
 
     # 미니게임 시간표
@@ -102,7 +98,7 @@ async def on_message(message):
         msg = Mini.get_recent_minigame()
         msg = Offer_Process_Time.configure(start, msg, message)
         await channel.send(msg, delete_after=60.0)
-        public_query.log_upload(message, "Minigame", msg)
+        public_query.log_upload(message, "Minigame", msg, str(time.time() - start))
         return None
 
     # 커스텀 메시지
@@ -116,7 +112,7 @@ async def on_message(message):
         if not msg == "False":
             msg = Offer_Process_Time.configure(start, msg, message)
             await channel.send(msg, delete_after=60.0)
-            public_query.log_upload(message, "CustomRespond", msg)
+            public_query.log_upload(message, "CustomRespond", msg, str(time.time() - start))
             return None
         else:
             return None

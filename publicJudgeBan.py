@@ -20,7 +20,6 @@ def return_location():
 
 def judge(message):
     conn = make_connection()
-    # DM으로 전송했는지 먼저 판단
     user_id = message.author.id
 
     # True 반환시 밴 당한 것
@@ -29,8 +28,9 @@ def judge(message):
             conn.close()
         return True
     else:
-        guild_id = message.guild.id
         try:
+            # 밴 당한 서버인지 체크
+            guild_id = message.guild.id
             if check_server(conn, guild_id):
                 if conn.open:
                     conn.close()

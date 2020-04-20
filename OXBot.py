@@ -1,4 +1,3 @@
-import time
 import threading
 import time
 import urllib.request
@@ -16,7 +15,6 @@ import Offer_Process_Time
 import Write_error_log
 import get_Boss
 import get_ranking
-import get_tts_mp3
 import inner_query
 
 
@@ -63,73 +61,8 @@ class chatbot(discord.Client):
     async def on_message(self, message):
         start = time.time()
 
-        if message.content.startswith("\"\" "):
-            channel = message.channel
-            voice_channel = where_user_in(message)
-
-            if voice_channel == "False":
-                await channel.send('들어가 있는 보이스 채널이 없습니다.', delete_after=10.0)
-                get_tts_mp3.upload_log(message)
-                return None
-            else:
-                keyword = message.content.replace("\"\" ", "", 1)
-
-                if get_tts_mp3.get_kakao_mp3(message, keyword):
-                    try:
-                        current_voiceclient = await voice_channel.connect(timeout=3.0)
-                        time.sleep(1)
-                    except:
-                        current_voiceclient = client.voice_clients[0]
-                        if not str(voice_channel.name) == str(current_voiceclient.channel):
-                            await current_voiceclient.disconnect(force=True)
-                            current_voiceclient = await voice_channel.connect(timeout=3.0)
-
-                    mp3url = "result.mp3"
-                    try:
-                        current_voiceclient.play(discord.FFmpegPCMAudio(mp3url))
-                        get_tts_mp3.upload_log(message)
-                        return None
-
-                    except:
-                        msg = "먼저 요청한 메시지를 재생하고 있습니다."
-                        await channel.send(msg, delete_after=10.0)
-                        get_tts_mp3.upload_log(message)
-                        return None
-                else:
-                    msg = "서버 문제로 인해 TTS 구성에 실패하였습니다."
-                    await channel.send(msg, delete_after=10.0)
-                    get_tts_mp3.upload_log(message)
-                    return None
-
-        if (len(client.voice_clients) > 0) and (not message.content == "!나가기"):
-            if get_tts_mp3.get_recent_use():
-                channel = message.channel
-                voice_list = client.voice_clients
-                await voice_list[0].disconnect(force=True)
-                await channel.send("30분 이상 사용하지 않아 나갔습니다.", delete_after=120.0)
-
-        if not str(message.author) == "메콩봇#5381":
-            pass
-
         # sender가 bot일 경우 ignore
         if message.author.bot:
-            return None
-
-        # 시간
-        if message.content == '!시간' or message.content == "!time" or message.content == "!TIME":
-            channel = message.channel
-
-            judge = judge_server(message)
-            if not judge == "True":
-                await channel.send(judge)
-                return None
-
-            now = time.localtime()
-            string = "%04d년 %02d월 %02d일 %02d시 %02d분 %02d초" % (
-                now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
-            msg = "현재 시간은 {} 입니다. (GMT+9)".format(string)
-            msg = Offer_Process_Time.configure(start, msg, message)
-            await channel.send(msg)
             return None
 
         if message.content.startswith("!연산 "):
@@ -317,91 +250,6 @@ class chatbot(discord.Client):
             await channel.send(msg)
             return None
 
-        if message.content == "!설정":
-            channel = message.channel
-            embed = discord.Embed(title="설정 방법",
-                                  description="\"!설정 (타입)(속도)(볼륨)(반말여부)\"로 제출해주세요. (띄어쓰기 없이!)\n설정 변경도 동일합니다. 이 메시지는 120초 후 삭제됩니다.")
-            embed.add_field(name="타입", value="1: 여성 차분한 낭독체\n2: 남성 차분한 낭독체\n3: 여성 밝은 대화체\n4: 남성 밝은 대화체", inline=False)
-            embed.add_field(name="속도", value="1: 느림\n2: 보통\n3: 빠름", inline=False)
-            embed.add_field(name="볼륨", value="1: 0.7배\n2: 1.0배\n3: 1.4배", inline=False)
-            embed.add_field(name="반말 여부 (\"안녕하세요\"라고 입력해도 \"안녕\"이라고 말함.)", value="1: 설정 안함\n2: 설정", inline=False)
-            embed.add_field(name="설정 예시", value="!설정 2221", inline=False)
-
-            await channel.send(embed=embed, delete_after=120.0)
-            return None
-
-        if message.content.startswith("!설정 "):
-            channel = message.channel
-            value = message.content.replace("!설정 ", "", 1)
-            try:
-                value_list = [int(value[0]) - 1, int(value[1]) - 1, int(value[2]) - 1, int(value[3]) - 1]
-
-                if not 0 <= int(value_list[0]) <= 3:
-                    msg = "잘못 된 타입 값 입니다."
-                    await channel.send(msg, delete_after=10.0)
-                    return None
-
-                if not 0 <= int(value_list[1]) <= 2:
-                    msg = "잘못 된 속도 값 입니다."
-                    await channel.send(msg, delete_after=10.0)
-                    return None
-
-                if not 0 <= int(value_list[2]) <= 2:
-                    msg = "잘못 된 볼륨 값 입니다."
-                    await channel.send(msg, delete_after=10.0)
-                    return None
-
-                if not 0 <= int(value_list[3]) <= 1:
-                    msg = "잘못 된 반말 여부 값 입니다."
-                    await channel.send(msg, delete_after=10.0)
-                    return None
-
-                if get_tts_mp3.upload_user_setting(message, value_list):
-                    msg = "설정 완료!"
-                    await channel.send(msg)
-                    return None
-
-                else:
-                    msg = "서버 문제로 인해 설정하지 못했습니다."
-                    await channel.send(msg)
-                    return None
-
-            except:
-                msg = "잘못 된 값을 입력하셨습니다."
-                await channel.send(msg)
-                return None
-
-        if message.content == "!현재설정":
-            channel = message.channel
-            now_setting = get_tts_mp3.configure_setting_text(message)
-
-            if len(now_setting) == 0:
-                await channel.send('설정 값이 없습니다.')
-                return None
-
-            embed = discord.Embed(title="현재 설정 (카카오 API)")
-            embed.add_field(name="타입", value=str(now_setting[0]), inline=False)
-            embed.add_field(name="속도", value=str(now_setting[1]), inline=False)
-            embed.add_field(name="볼륨", value=str(now_setting[2]), inline=False)
-            embed.add_field(name="반말 여부 (\"안녕하세요\"라고 입력해도 \"안녕\"이라고 말함.)", value=str(now_setting[3]), inline=False)
-            await channel.send("<@" + str(message.author.id) + "> 님의 현재 설정입니다.", embed=embed, delete_after=120.0)
-
-        if message.content == "!나가기":
-            channel = message.channel
-            voice_list = client.voice_clients
-
-            if len(voice_list) == 0:
-                msg = '들어간 보이스 채널이 없습니다.'
-                msg = Offer_Process_Time.configure(start, msg, message)
-                await channel.send(msg, delete_after=10.0)
-                return None
-            else:
-                msg = '나가기 완료'
-                msg = Offer_Process_Time.configure(start, msg, message)
-                await voice_list[0].disconnect(force=True)
-                await channel.send(msg, delete_after=10.0)
-                return None
-
         if message.content.startswith("!"):
             channel = message.channel
 
@@ -446,9 +294,9 @@ if __name__ == "__main__":
     Write_error_log.write_log(return_location(), "Thread Start")
     # BOT Token
     # Main Token = "{DISCORD_BOT_TOKEN}"
-    token = "{DISCORD_BOT_TOKEN}"
+    # token = "{DISCORD_BOT_TOKEN}"
 
     # Dev Token = "{DISCORD_BOT_TOKEN}"
-    # token = "{DISCORD_BOT_TOKEN}"
+    token = "{DISCORD_BOT_TOKEN}"
     client.run(token)
 

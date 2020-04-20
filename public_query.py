@@ -14,14 +14,52 @@ def too_many_result():
 
 
 def log_upload(message, querytype, respond):
+    conn = public_SQL.make_connection()
+    curs = conn.cursor()
     try:
-        conn = public_SQL.make_connection()
-        curs = conn.cursor()
         # time, user, type, chat, Server, ServerID, ChannelName
         query = "insert into PublicVerLog values (now(), %s, %s, %s, %s, %s, %s, %s, %s)"
-        curs.execute(query, (str(message.author), str(message.author.id), str(querytype), str(message.content), str(respond), str(message.guild.name), str(message.guild.id), str(message.channel.name)))
+        curs.execute(query, (
+        str(message.author), str(message.author.id), str(querytype), str(message.content), str(respond),
+        str(message.guild.name), str(message.guild.id), str(message.channel.name)))
         conn.commit()
         conn.close()
+
+    # DM으로 보낸 경우에는 서버 ID를 찾을 수 없어서 에러가 발생함.
+    except AttributeError:
+        # time, user, type, chat, Server, ServerID, ChannelName
+        query = "insert into PublicVerLog values (now(), %s, %s, %s, %s, %s, null, null, null)"
+        curs.execute(query, (
+            str(message.author), str(message.author.id), str(querytype), str(message.content), str(respond)))
+        conn.commit()
+        conn.close()
+
+    except Exception as e:
+        Write_error_log.write_log(return_location(), str(e))
+        if conn.open:
+            conn.close()
+
+
+def upload_log(query, content, respond):
+    conn = public_SQL.make_connection()
+    curs = conn.cursor()
+    curs.execute(query, (content, respond))
+    conn.commit()
+    conn.close()
+
+
+def new_log_upload(message, querytype, respond, processtime):
+    try:
+        # QueryTime, User_id, Query, Respond, Query_type, Query_from, Server_id, ProcessTime
+        query = "insert into log values (now(), {}, %s, %s, '{}', {}, '{}', {})" \
+            .format(str(message.author.id), querytype, str(1), str(message.guild.id), processtime)
+        upload_log(query, str(message.content), str(respond))
+    # DM으로 보낸 경우에는 서버 ID를 찾을 수 없어서 에러가 발생함.
+    except AttributeError:
+        # QueryTime, User_id, Query, Respond, Query_type, Query_from, Server_id, ProcessTime
+        query = "insert into log values (now(), {}, %s, %s, '{}', {}, null, {})" \
+            .format(str(message.author.id), querytype, str(0), processtime)
+        upload_log(query, str(message.content), str(respond))
 
     except Exception as e:
         Write_error_log.write_log(return_location(), str(e))
