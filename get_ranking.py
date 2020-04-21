@@ -7,6 +7,7 @@ import requests
 import Write_error_log
 
 
+# TODO: 소스 정리 필요
 def return_location():
     return "GuildOXBot - get_ranking.py"
 

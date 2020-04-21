@@ -1,8 +1,7 @@
 import re
-
 import pymysql
-
 import SQL
+
 # 별도 파일
 import Write_error_log
 import public_SQL

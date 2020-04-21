@@ -15,7 +15,7 @@ import Offer_Process_Time
 import Write_error_log
 import get_Boss
 import get_ranking
-import inner_query
+import guild_query
 
 
 # 메콩OX봇#5381
@@ -23,20 +23,6 @@ import inner_query
 
 def return_location():
     return "GuildOXBot - OXBot.py"
-
-
-def where_user_in(message):
-    user_id = message.author.id
-    guild_voice_list = message.guild.voice_channels
-
-    for i in guild_voice_list:
-        for j in range(len(i.members)):
-            # i 채널에 유저가 있으면
-            if str(i.members[j].id) == str(user_id):
-                # 유저가 있는 보이스 채널을 리턴
-                return i
-
-    return "False"
 
 
 def judge_server(message):
@@ -259,7 +245,7 @@ class chatbot(discord.Client):
                 await channel.send(judge)
                 return None
 
-            msg = inner_query.get_custom_query(message)
+            msg = guild_query.get_custom_query(message)
 
             if not msg == "False":
                 msg = Offer_Process_Time.configure(start, msg, message)
