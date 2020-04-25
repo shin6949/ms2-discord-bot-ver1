@@ -1,5 +1,5 @@
 import datetime
-
+import os
 import pymysql
 
 # 외부 파일
@@ -7,53 +7,70 @@ import Write_error_log
 
 
 def return_location():
-    return "GuildOXBot - Backup_Task"
+    return "GuildOXBot - Backup_Task.py"
 
 
-# TODO 익명화 로그 대응 필요, 백업 서버도 30일 이후 삭제하도록 대응 필요
-def backup_db():
+def delete_log():
+    # 30일 전 로그를 삭제
     try:
-        main_conn = pymysql.connect(host='{DB_HOST}', user='{DB_USER}', password='{DB_PASSWORD}', db='MS2OX',
+        main_conn = pymysql.connect(host='localhost', user='{DB_USER}', password='{DB_PASSWORD}', db='MS2OX',
                                     charset='utf8mb4')
-        backup_conn = pymysql.connect(host='{DB_HOST}', user='{DB_USER}', password='{DB_PASSWORD}', db='MS2OX',
-                                      charset='utf8mb4')
     except Exception as e:
         Write_error_log.write_log(return_location(), str(e))
         return False
-
-    # 전날 오전 5시를 지정
-    day = (datetime.datetime.now() + datetime.timedelta(days=-1)).strftime('%Y-%m-%d 05:00:00')
-    curs = main_conn.cursor(pymysql.cursors.DictCursor)
-
-    # 전날 오전 5시 ~ 오늘 오전 5시까지 불러옴
-    query = "SELECT * FROM PublicVerLog WHERE usetime >= '{}'".format(str(day))
-    curs.execute(query)
-    rows = curs.fetchall()
-
-    for data in rows:
-        try:
-            curs = backup_conn.cursor()
-            # time, user, type, chat, Server, ServerID, ChannelName
-            query = "insert into PublicVerLog values (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-            curs.execute(query, (data["usetime"], data["user"], data["user_id"], data["type"], data["chat"],
-                                 data["respond"], data["Server"], data["SeverID"], data["ChannelName"]))
-            backup_conn.commit()
-        except Exception as e:
-            Write_error_log.write_log(return_location(), str(e))
 
     # 한달전 5시를 지정
     month = (datetime.datetime.now() + datetime.timedelta(days=-30)).strftime('%Y-%m-%d 05:00:00')
 
     try:
         curs = main_conn.cursor()
-        query = "DELETE FROM PublicVerLog WHERE usetime < '{}'".format(str(month))
+        query = "DELETE FROM log WHERE QueryTime < '{}'".format(str(month))
         curs.execute(query)
         main_conn.commit()
+
     except Exception as e:
         Write_error_log.write_log(return_location(), str(e))
+        return False
 
-    main_conn.close()
-    backup_conn.close()
+    if main_conn.open:
+        main_conn.close()
+
+    return True
+
+
+# 다운로드한 프로필 사진, 길드 로고 삭제
+def delete_png():
+    path = "./"
+    files = os.listdir(path)
+
+    tmpcount = 0
+
+    for file in files:
+        tmp = "{}/{}".format(path, file)
+        name, exten = os.path.splitext(tmp)
+
+        if exten == ".png":
+            if os.path.isfile(tmp):
+                try:
+                    os.remove(tmp)
+                    tmpcount += 1
+
+                except Exception as e:
+                    Write_error_log.write_log(return_location(), str(e))
+                    return False
+
+    Write_error_log.write_log(return_location(), str(tmpcount))
+    return True
+
+
+def doing_task():
+    if not delete_log():
+        Write_error_log.write_log(return_location(), str("Error Occurred"))
+        return False
+
+    if not delete_png():
+        Write_error_log.write_log(return_location(), str("Error Occurred"))
+        return False
 
     return True
 

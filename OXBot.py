@@ -201,7 +201,7 @@ class chatbot(discord.Client):
 
             if not message.content.find("!개트종") == -1:
                 keyword = message.content.replace("!개트종 ", "", 1)
-                person_list = get_ranking.get_person_ranking_search_by_keyword("realtime", keyword)
+                person_list = get_ranking.get_person_ranking_search_by_keyword("None", keyword)
 
                 if str(type(person_list)) == "<class 'str'>":
                     msg = person_list
@@ -266,7 +266,7 @@ def thread_execute():
 
 
 def backup_db():
-    if Backup_Task.backup_db():
+    if Backup_Task.doing_task():
         Write_error_log.write_log(return_location(), "Backup Task Finished")
     else:
         Write_error_log.write_log(return_location(), "Backup Task Failed")
@@ -278,11 +278,12 @@ if __name__ == "__main__":
     thread_1.start()
 
     Write_error_log.write_log(return_location(), "Thread Start")
+
     # BOT Token
     # Main Token = "{DISCORD_BOT_TOKEN}"
-    # token = "{DISCORD_BOT_TOKEN}"
+    token = "{DISCORD_BOT_TOKEN}"
 
     # Dev Token = "{DISCORD_BOT_TOKEN}"
-    token = "{DISCORD_BOT_TOKEN}"
+    # token = "{DISCORD_BOT_TOKEN}"
     client.run(token)
 

@@ -13,7 +13,7 @@ def too_many_result():
     return "검색 결과가 30개가 넘어요!\n디스코드 내 최대 글자수 제한이 있어서 결과를 표시 할 수 없습니다. 좀 더 길게 검색해보세요."
 
 
-def log_upload(message, querytype, respond):
+def old_log_upload(message, querytype, respond):
     conn = public_SQL.make_connection()
     curs = conn.cursor()
     try:
@@ -40,44 +40,52 @@ def log_upload(message, querytype, respond):
             conn.close()
 
 
-def upload_log(query, content, respond):
-    conn = public_SQL.make_connection()
-    curs = conn.cursor()
-    curs.execute(query, (content, respond))
-    conn.commit()
-    conn.close()
+def upload_sql(query, content, respond):
+    try:
+        conn = public_SQL.make_connection()
+        curs = conn.cursor()
+        curs.execute(query, (content, respond))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(e)
+        Write_error_log.write_log(return_location(), str(e))
 
 
-# TODO: 익명 로그 기능 완성 필요 또한 로그 수집 거부 기능 완성해야함.
-def new_log_upload(message, querytype, respond, processtime):
+# TODO: 로그 수집 거부 기능 완성해야함.
+def log_upload(message, querytype, respond, processtime):
     try:
         # QueryTime, User_id, Query, Respond, Query_type, Query_from, Server_id, ProcessTime
         query = "insert into log values (now(), {}, %s, %s, '{}', {}, '{}', {})" \
             .format(str(message.author.id), querytype, str(1), str(message.guild.id), processtime)
-        upload_log(query, str(message.content), str(respond))
+        upload_sql(query, str(message.content), str(respond))
     # DM으로 보낸 경우에는 서버 ID를 찾을 수 없어서 에러가 발생함.
     except AttributeError:
         # QueryTime, User_id, Query, Respond, Query_type, Query_from, Server_id, ProcessTime
         query = "insert into log values (now(), {}, %s, %s, '{}', {}, null, {})" \
             .format(str(message.author.id), querytype, str(0), processtime)
-        upload_log(query, str(message.content), str(respond))
+        upload_sql(query, str(message.content), str(respond))
 
     except Exception as e:
         Write_error_log.write_log(return_location(), str(e))
+        print(e)
 
 
 def return_custom_msg(message, conn):
-    curs = conn.cursor(pymysql.cursors.DictCursor)
-    query = "SELECT Respond FROM PublicVerCustomRespond WHERE Command = '{}'".format(message.content)
-    curs.execute(query)
-    rows = curs.fetchall()
+    try:
+        curs = conn.cursor(pymysql.cursors.DictCursor)
+        query = "SELECT Respond FROM PublicVerCustomRespond WHERE Command = '{}'".format(message.content)
+        curs.execute(query)
+        rows = curs.fetchall()
 
-    if not len(rows) == 0:
-        msg = rows[0]['Respond']
-    else:
-        msg = "False"
+        if not len(rows) == 0:
+            msg = rows[0]['Respond']
+        else:
+            msg = "False"
 
-    return msg
+        return msg
+    except:
+        return "False"
 
 
 def get_custom_query(message):
@@ -88,15 +96,6 @@ def get_custom_query(message):
             conn.close()
         return msg
 
-    except:
-        try:
-            conn = public_SQL.make_backupconnection()
-            msg = return_custom_msg(message, conn)
-            if conn.open:
-                conn.close()
-            return msg
-
-        except Exception as e:
-            Write_error_log.write_log(return_location(), str(e))
-            return "False"
+    except Exception as e:
+        return "False"
 

@@ -2,8 +2,8 @@ import time
 
 import discord
 
-import Calculator
 # 별도 파일들
+import Calculator
 import Mini
 import OX_Quiz_Result
 import Offer_Process_Time
@@ -17,11 +17,11 @@ client = discord.Client()
 
 # BOT Token
 # Main Token = "{DISCORD_BOT_TOKEN}"
-# token = "{DISCORD_BOT_TOKEN}"
+token = "{DISCORD_BOT_TOKEN}"
 
 
 # Dev Token
-token = "{DISCORD_BOT_TOKEN}"
+# token = "{DISCORD_BOT_TOKEN}"
 
 # Bot initialize
 @client.event
