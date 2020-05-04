@@ -26,9 +26,10 @@ token = "{DISCORD_BOT_TOKEN}"
 # Bot initialize
 @client.event
 async def on_ready():
-    print("READY")
     game = discord.Game("!ox로 검색, !설명서")
     await client.change_presence(status=discord.Status.online, activity=game)
+    print("사용 중인 서버 갯수: {}".format(len(client.guilds)))
+    print("READY")
 
 
 # message respond
@@ -117,5 +118,5 @@ async def on_message(message):
         else:
             return None
 
-client.run(token)
 
+client.run(token)
