@@ -30,7 +30,7 @@ async def on_ready():
     await client.change_presence(status=discord.Status.online, activity=game)
     print("사용 중인 서버 갯수: {}".format(len(client.guilds)))
     print("READY")
-
+    print("READY")
 
 # message respond
 @client.event

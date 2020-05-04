@@ -2,12 +2,11 @@ import threading
 import time
 import urllib.request
 from pprint import pprint
-
 import discord
 import schedule
-
 import Backup_Task
 import Calculator
+
 # 별도 파일
 import Mini
 import OX_Quiz_Result
@@ -42,49 +41,44 @@ class chatbot(discord.Client):
     async def on_ready(self):
         game = discord.Game("!설명서, !ㅋ으로 문제 검색")
         await client.change_presence(status=discord.Status.online, activity=game)
-        for i in client.guilds:
-            print("서버 이름 {} 내 채널".format(i.name))
-            for j in i.channels:
-                print("이름: {} / ID Value: {}".format(j.name, j.id))
         print("READY")
 
+    # {PRIVATE_GUILD_NAME} 길드 서버 ID: {DISCORD_SERVER_ID}
+    # {PRIVATE_GUILD_NAME} 길드 내 자유 채팅 채널 ID: {PRIVATE_DISCORD_CHANNEL_ID}
+    # TEST 서버 내 자유 채팅 채널 ID: {TEST_DISCORD_CHANNEL_ID}
     async def on_member_join(self, member):
-        print(member)
-        channel = member.guild.get_channel({TEST_DISCORD_CHANNEL_ID})
-        msg = "'{}'님이 서버에 들어오셨어요. 환영합니다.".format(member.name)
-        await channel.send(msg)
-
-    async def on_member_remove(self, member):
-        channel = member.guild.get_channel({TEST_DISCORD_CHANNEL_ID})
-
-        if member.nick is None:
-            msg = "'{}'님이 서버에서 나가셨습니다.".format(member.name)
+        # {PRIVATE_GUILD_NAME} 길드 서버 ID 라면
+        if str(member.guild.id) == "{DISCORD_SERVER_ID}":
+            channel = member.guild.get_channel({PRIVATE_DISCORD_CHANNEL_ID})
+            # {SERVER_ADMIN_NAME}({SERVER_ADMIN_ID}), {SERVER_ADMIN_NAME}({SERVER_ADMIN_ID}) 자동 태그
+            msg = "'<@{}>'님이 서버에 들어오셨어요. 환영합니다." \
+                  "\n인게임 닉네임을 말씀하시면 확인 후 닉네임 변경해드립니다. 그렇죠 <@{}>, <@{}>님?"\
+                .format(str(member.id), str({SERVER_ADMIN_ID}), str({SERVER_ADMIN_ID}))
+            await channel.send(msg)
+        # 테스트 서버 ID 라면
         else:
-            msg = "'{}'님이 서버에서 나가셨습니다.".format(member.nick)
-
-        await channel.send(msg)
+            channel = member.guild.get_channel({TEST_DISCORD_CHANNEL_ID})
+            msg = "'{}'님이 서버에 들어오셨어요. 환영합니다.".format(member.name)
+            await channel.send(msg)
 
     async def on_member_update(self, before, after):
-        channel = after.guild.get_channel({TEST_DISCORD_CHANNEL_ID})
+        # {PRIVATE_GUILD_NAME} 길드 서버 ID 라면
+        if str(after.guild.id) == "{DISCORD_SERVER_ID}":
+            channel = after.guild.get_channel({PRIVATE_DISCORD_CHANNEL_ID})
+        # 테스트 서버 ID 라면
+        else:
+            channel = after.guild.get_channel({TEST_DISCORD_CHANNEL_ID})
 
         if not before.nick == after.nick:
             if before.nick is None:
                 if after.nick is None:
-                    msg = "'{}'님에서 '{}'님으로 닉네임이 변경되었습니다.".format(before.name, after.name)
+                    msg = "<@{}> '{}'님에서 '{}'님으로 닉네임이 변경되었습니다.".format(after.id, before.name, after.name)
                 else:
-                    msg = "'{}'님에서 '{}'님으로 닉네임이 변경되었습니다.".format(before.name, after.nick)
+                    msg = "<@{}> '{}'님에서 '{}'님으로 닉네임이 변경되었습니다.".format(after.id, before.name, after.nick)
             elif after.nick is None:
-                msg = "'{}'님에서 '{}'님으로 닉네임이 변경되었습니다.".format(before.nick, after.name)
+                msg = "<@{}> '{}'님에서 '{}'님으로 닉네임이 변경되었습니다.".format(after.id, before.nick, after.name)
             else:
-                msg = "'{}'님에서 '{}'님으로 닉네임이 변경되었습니다.".format(before.nick, after.nick)
-
-            await channel.send(msg)
-
-        if before.status != after.status:
-            if after.nick is None:
-                msg = "'{}'님의 상태가 {}에서 {}으로 변경되었습니다.".format(after.name, before.status, after.status)
-            else:
-                msg = "'{}'님의 상태가 {}에서 {}으로 변경되었습니다.".format(after.nick, before.status, after.status)
+                msg = "<@{}> '{}'님에서 '{}'님으로 닉네임이 변경되었습니다.".format(after.id, before.nick, after.nick)
 
             await channel.send(msg)
 
@@ -317,7 +311,7 @@ def backup_db():
 
 
 if __name__ == "__main__":
-    client = chatbot()
+    client = chatbot(max_messages=None)
     thread_1 = threading.Thread(target=thread_execute)
     thread_1.start()
 
@@ -325,9 +319,8 @@ if __name__ == "__main__":
 
     # BOT Token
     # Main Token = "{DISCORD_BOT_TOKEN}"
-    # token = "{DISCORD_BOT_TOKEN}"
+    token = "{DISCORD_BOT_TOKEN}"
 
     # Dev Token = "{DISCORD_BOT_TOKEN}"
-    token = "{DISCORD_BOT_TOKEN}"
+    # token = "{DISCORD_BOT_TOKEN}"
     client.run(token)
-
