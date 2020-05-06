@@ -25,12 +25,18 @@ token = "{DISCORD_BOT_TOKEN}"
 
 # Bot initialize
 @client.event
+# on_ready는 봇을 다시 구성할 때도 호출 됨 (한번만 호출되는 것이 아님.)
 async def on_ready():
     game = discord.Game("!ox로 검색, !설명서")
     await client.change_presence(status=discord.Status.online, activity=game)
-    print("사용 중인 서버 갯수: {}".format(len(client.guilds)))
     print("READY")
-    print("READY")
+
+    # 봇 시작 통보
+    msg = "봇이 시작되었습니다.\n사용중인 서버: {}개".format(len(client.guilds))
+    # DM으로 전달
+    cocoblue = client.get_user({DEVELOPER_USER_ID}).create_dm()
+    await cocoblue.send(msg)
+
 
 # message respond
 @client.event

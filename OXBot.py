@@ -2,11 +2,12 @@ import threading
 import time
 import urllib.request
 from pprint import pprint
+
 import discord
 import schedule
+
 import Backup_Task
 import Calculator
-
 # 별도 파일
 import Mini
 import OX_Quiz_Result
@@ -38,10 +39,17 @@ def judge_server(message):
 
 
 class chatbot(discord.Client):
+    # on_ready는 봇을 다시 구성할 때도 호출 됨 (한번만 호출되는 것이 아님.)
     async def on_ready(self):
         game = discord.Game("!설명서, !ㅋ으로 문제 검색")
         await client.change_presence(status=discord.Status.online, activity=game)
         print("READY")
+
+        # 봇 시작 통보
+        msg = "봇이 시작되었습니다.\n사용중인 서버: {}개".format(len(client.guilds))
+        # DM으로 전달
+        cocoblue = await client.get_user({DEVELOPER_USER_ID}).create_dm()
+        await cocoblue.send(msg)
 
     # {PRIVATE_GUILD_NAME} 길드 서버 ID: {DISCORD_SERVER_ID}
     # {PRIVATE_GUILD_NAME} 길드 내 자유 채팅 채널 ID: {PRIVATE_DISCORD_CHANNEL_ID}
@@ -49,17 +57,31 @@ class chatbot(discord.Client):
     async def on_member_join(self, member):
         # {PRIVATE_GUILD_NAME} 길드 서버 ID 라면
         if str(member.guild.id) == "{DISCORD_SERVER_ID}":
-            channel = member.guild.get_channel({PRIVATE_DISCORD_CHANNEL_ID})
             # {SERVER_ADMIN_NAME}({SERVER_ADMIN_ID}), {SERVER_ADMIN_NAME}({SERVER_ADMIN_ID}) 자동 태그
             msg = "'<@{}>'님이 서버에 들어오셨어요. 환영합니다." \
-                  "\n인게임 닉네임을 말씀하시면 확인 후 닉네임 변경해드립니다. 그렇죠 <@{}>, <@{}>님?"\
+                  "\n인게임 닉네임을 말씀하시면 확인 후 닉네임 변경해드립니다. 그렇죠 <@{}>, <@{}>님?" \
                 .format(str(member.id), str({SERVER_ADMIN_ID}), str({SERVER_ADMIN_ID}))
+            await member.guild.get_channel({PRIVATE_DISCORD_CHANNEL_ID}).send(msg)
+
+            # DM으로 {SERVER_ADMIN_NAME}과 {SERVER_ADMIN_NAME}에게 전달
+            msg = "길드 서버에 {}님이 들어오셨습니다. 길드 서버에 태그해드렸으니 확인해보세요.".format(member)
+            # {SERVER_ADMIN_NAME}께 전달하는 메시지
+            nasa = client.get_user({SERVER_ADMIN_ID})
+            channel = nasa.create_dm()
             await channel.send(msg)
+            # {SERVER_ADMIN_NAME}께 전달하는 메시지
+            yul = client.get_user({SERVER_ADMIN_ID})
+            channel = yul.create_dm()
+            await channel.send(msg)
+            # TODO: 테스트용 코코블루에게 전달하는 코드 -> 작동 확인후 삭제 해야함.
+            cocoblue = client.get_user({DEVELOPER_USER_ID})
+            channel = cocoblue.create_dm()
+            await channel.send(msg)
+
         # 테스트 서버 ID 라면
         else:
-            channel = member.guild.get_channel({TEST_DISCORD_CHANNEL_ID})
             msg = "'{}'님이 서버에 들어오셨어요. 환영합니다.".format(member.name)
-            await channel.send(msg)
+            await member.guild.get_channel({TEST_DISCORD_CHANNEL_ID}).send(msg)
 
     async def on_member_update(self, before, after):
         # {PRIVATE_GUILD_NAME} 길드 서버 ID 라면
@@ -83,6 +105,11 @@ class chatbot(discord.Client):
             await channel.send(msg)
 
     async def on_message(self, message):
+        if client.get_user({DEVELOPER_USER_ID}).dm_channel:
+            print("EXIST")
+        else:
+            print("NOT EXIST")
+
         start = time.time()
 
         # sender가 bot일 경우 ignore
