@@ -59,7 +59,7 @@ def delete_png():
                     Write_error_log.write_log(return_location(), str(e))
                     return False
 
-    Write_error_log.write_log(return_location(), str(tmpcount))
+    Write_error_log.write_log(return_location(), "{}개의 png 임시 파일을 삭제 완료".format(str(tmpcount)))
     return True
 
 
