@@ -31,12 +31,6 @@ async def on_ready():
     await client.change_presence(status=discord.Status.online, activity=game)
     print("READY")
 
-    # 봇 시작 통보
-    msg = "봇이 시작되었습니다.\n사용중인 서버: {}개".format(len(client.guilds))
-    # DM으로 전달
-    cocoblue = client.get_user({DEVELOPER_USER_ID}).create_dm()
-    await cocoblue.send(msg)
-
 
 # message respond
 @client.event

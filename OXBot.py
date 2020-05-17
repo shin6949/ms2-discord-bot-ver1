@@ -6,10 +6,10 @@ from pprint import pprint
 import discord
 import schedule
 
-import Backup_Task
 import Calculator
 # 별도 파일
 import Mini
+import Morning_Task
 import OX_Quiz_Result
 import Offer_Process_Time
 import Write_error_log
@@ -45,12 +45,6 @@ class chatbot(discord.Client):
         await client.change_presence(status=discord.Status.online, activity=game)
         print("READY")
 
-        # 봇 시작 통보
-        msg = "봇이 시작되었습니다.\n사용중인 서버: {}개".format(len(client.guilds))
-        # DM으로 전달
-        cocoblue = await client.get_user({DEVELOPER_USER_ID}).create_dm()
-        await cocoblue.send(msg)
-
     # {PRIVATE_GUILD_NAME} 길드 서버 ID: {DISCORD_SERVER_ID}
     # {PRIVATE_GUILD_NAME} 길드 내 자유 채팅 채널 ID: {PRIVATE_DISCORD_CHANNEL_ID}
     # TEST 서버 내 자유 채팅 채널 ID: {TEST_DISCORD_CHANNEL_ID}
@@ -65,23 +59,39 @@ class chatbot(discord.Client):
 
             # DM으로 {SERVER_ADMIN_NAME}과 {SERVER_ADMIN_NAME}에게 전달
             msg = "길드 서버에 {}님이 들어오셨습니다. 길드 서버에 태그해드렸으니 확인해보세요.".format(member)
-            # {SERVER_ADMIN_NAME}께 전달하는 메시지
+
+            # {SERVER_ADMIN_NAME}께 메시지 전달
             nasa = client.get_user({SERVER_ADMIN_ID})
-            channel = nasa.create_dm()
+            if nasa.dm_channel:
+                channel = nasa.dm_channel
+            else:
+                channel = nasa.create_dm()
+
             await channel.send(msg)
-            # {SERVER_ADMIN_NAME}께 전달하는 메시지
+
+            # {SERVER_ADMIN_NAME}께 메시지 전달
             yul = client.get_user({SERVER_ADMIN_ID})
-            channel = yul.create_dm()
+            if yul.dm_channel:
+                channel = yul.dm_channel
+            else:
+                channel = yul.create_dm()
+
             await channel.send(msg)
+
             # TODO: 테스트용 코코블루에게 전달하는 코드 -> 작동 확인후 삭제 해야함.
             cocoblue = client.get_user({DEVELOPER_USER_ID})
-            channel = cocoblue.create_dm()
+            if cocoblue.dm_channel:
+                channel = cocoblue.dm_channel
+            else:
+                channel = cocoblue.create_dm()
             await channel.send(msg)
+            return None
 
         # 테스트 서버 ID 라면
         else:
             msg = "'{}'님이 서버에 들어오셨어요. 환영합니다.".format(member.name)
             await member.guild.get_channel({TEST_DISCORD_CHANNEL_ID}).send(msg)
+            return None
 
     async def on_member_update(self, before, after):
         # {PRIVATE_GUILD_NAME} 길드 서버 ID 라면
@@ -103,6 +113,7 @@ class chatbot(discord.Client):
                 msg = "<@{}> '{}'님에서 '{}'님으로 닉네임이 변경되었습니다.".format(after.id, before.nick, after.nick)
 
             await channel.send(msg)
+            return None
 
     async def on_message(self, message):
         if client.get_user({DEVELOPER_USER_ID}).dm_channel:
@@ -321,7 +332,7 @@ class chatbot(discord.Client):
 
 
 def thread_execute():
-    schedule.every().day.at("05:00").do(backup_db).tag("SQL TASK")
+    schedule.every().day.at("05:00").do(doing_task).tag("SQL TASK")
     pprint(schedule.jobs)
     Write_error_log.write_log(return_location(), "Task Scheduled")
 
@@ -330,8 +341,8 @@ def thread_execute():
         time.sleep(1)
 
 
-def backup_db():
-    if Backup_Task.doing_task():
+def doing_task():
+    if Morning_Task.doing_task():
         Write_error_log.write_log(return_location(), "Backup Task Finished")
     else:
         Write_error_log.write_log(return_location(), "Backup Task Failed")

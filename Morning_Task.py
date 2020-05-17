@@ -1,5 +1,6 @@
 import datetime
 import os
+
 import pymysql
 
 # 외부 파일
@@ -7,7 +8,7 @@ import Write_error_log
 
 
 def return_location():
-    return "GuildOXBot - Backup_Task.py"
+    return "GuildOXBot - Morning_Task.py"
 
 
 def delete_log():
@@ -25,6 +26,15 @@ def delete_log():
     try:
         curs = main_conn.cursor()
         query = "DELETE FROM log WHERE QueryTime < '{}'".format(str(month))
+        curs.execute(query)
+        main_conn.commit()
+
+        # querynum을 정리
+        query = "SET @COUNT = 0"
+        curs.execute(query)
+        main_conn.commit()
+
+        query = "UPDATE log SET querynum = @COUNT:= @COUNT + 1"
         curs.execute(query)
         main_conn.commit()
 

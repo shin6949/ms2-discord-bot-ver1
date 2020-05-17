@@ -56,13 +56,13 @@ def upload_sql(query, content, respond):
 def log_upload(message, querytype, respond, processtime):
     try:
         # QueryTime, User_id, Query, Respond, Query_type, Query_from, Server_id, ProcessTime
-        query = "insert into log values (now(), {}, %s, %s, '{}', {}, '{}', {})" \
+        query = "insert into log(QueryTime, User_id, Query, Respond, Query_type, Query_from, Server_id, ProcessTime) values (now(), {}, %s, %s, '{}', {}, '{}', {})" \
             .format(str(message.author.id), querytype, str(1), str(message.guild.id), processtime)
         upload_sql(query, str(message.content), str(respond))
     # DM으로 보낸 경우에는 서버 ID를 찾을 수 없어서 에러가 발생함.
     except AttributeError:
         # QueryTime, User_id, Query, Respond, Query_type, Query_from, Server_id, ProcessTime
-        query = "insert into log values (now(), {}, %s, %s, '{}', {}, null, {})" \
+        query = "insert into log(QueryTime, User_id, Query, Respond, Query_type, Query_from, Server_id, ProcessTime) values (now(), {}, %s, %s, '{}', {}, null, {})" \
             .format(str(message.author.id), querytype, str(0), processtime)
         upload_sql(query, str(message.content), str(respond))
 
