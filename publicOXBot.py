@@ -118,7 +118,7 @@ async def on_message(message):
 
         msg = Mini.get_next_minigame()
         msg = Offer_Process_Time.configure(start, msg, message)
-        await channel.send(msg)
+        await channel.send(msg, delete_after=60.0)
         return None
 
     # 커스텀 메시지
