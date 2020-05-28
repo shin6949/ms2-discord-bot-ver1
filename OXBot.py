@@ -2,15 +2,15 @@ import threading
 import time
 import urllib.request
 from pprint import pprint
-
 import discord
 import schedule
+from konlpy.tag import Okt
 
-import Calculator
 # 별도 파일
+import Calculator
 import Mini
 import Morning_Task
-import OX_Quiz_Result
+import testing_ox_query as OX_Quiz_Result
 import Offer_Process_Time
 import Write_error_log
 import get_Boss
@@ -39,6 +39,12 @@ def judge_server(message):
 
 
 class chatbot(discord.Client):
+    # 처음 켰을 때 호출되는 함수
+    async def on_connect(self):
+        nlpy = Okt(max_heap_size=79)
+        nlpy.nouns("옵치")
+        print("nlpy Load")
+
     # on_ready는 봇을 다시 구성할 때도 호출 됨 (한번만 호출되는 것이 아님.)
     async def on_ready(self):
         game = discord.Game("!설명서, !ㅋ으로 문제 검색")
@@ -78,15 +84,6 @@ class chatbot(discord.Client):
 
             await channel.send(msg)
 
-            # TODO: 테스트용 코코블루에게 전달하는 코드 -> 작동 확인후 삭제 해야함.
-            cocoblue = client.get_user({DEVELOPER_USER_ID})
-            if cocoblue.dm_channel:
-                channel = cocoblue.dm_channel
-            else:
-                channel = cocoblue.create_dm()
-            await channel.send(msg)
-            return None
-
         # 테스트 서버 ID 라면
         else:
             msg = "'{}'님이 서버에 들어오셨어요. 환영합니다.".format(member.name)
@@ -116,11 +113,6 @@ class chatbot(discord.Client):
             return None
 
     async def on_message(self, message):
-        if client.get_user({DEVELOPER_USER_ID}).dm_channel:
-            print("EXIST")
-        else:
-            print("NOT EXIST")
-
         start = time.time()
 
         # sender가 bot일 경우 ignore
@@ -156,6 +148,21 @@ class chatbot(discord.Client):
             await channel.send(msg)
             return None
 
+        # 다음 미니게임 시간표
+        if message.content == "!다음미겜":
+            channel = message.channel
+
+            judge = judge_server(message)
+            if not judge == "True":
+                judge = Offer_Process_Time.configure(start, judge, message)
+                await channel.send(judge)
+                return None
+
+            msg = Mini.get_next_minigame()
+            msg = Offer_Process_Time.configure(start, msg, message)
+            await channel.send(msg)
+            return None
+
         # OX 퀴즈 검색하기
         if message.content == '!ox' or message.content == '!OX' or message.content == '!퀴즈' or message.content == '!ㅋ' or message.content == '!q':
             channel = message.channel
@@ -166,6 +173,7 @@ class chatbot(discord.Client):
 
         if message.content.startswith('!ox ') or message.content.startswith('!OX ') or message.content.startswith(
                 '!퀴즈 ') or message.content.startswith('!ㅋ ') or message.content.startswith('!q '):
+            nlpy = Okt(max_heap_size=79)
             channel = message.channel
 
             judge = judge_server(message)
@@ -174,7 +182,7 @@ class chatbot(discord.Client):
                 await channel.send(judge)
                 return None
 
-            msg = OX_Quiz_Result.get(message, "Guild")
+            msg = OX_Quiz_Result.get(message, "Guild", nlpy)
             msg = Offer_Process_Time.configure(start, msg, message)
             await channel.send(msg)
             return None

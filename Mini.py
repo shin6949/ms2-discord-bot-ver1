@@ -1,10 +1,9 @@
 from datetime import datetime, timedelta
-
 import pymysql
 
-import SQL
 # 별도 파일
 import Write_error_log
+import SQL
 
 
 def return_location():
@@ -12,8 +11,17 @@ def return_location():
 
 
 def get_recent_minigame():
+    now = datetime.now() - timedelta(minutes=1)
+    return return_message(now)
+
+
+def get_next_minigame():
+    now = datetime.now() + timedelta(minutes=29)
+    return return_message(now)
+
+
+def return_message(now):
     try:
-        now = datetime.now() - timedelta(minutes=1)
         # string = "%02d:%02d:%02d" % (now.time().tm_hour, now.tm_min, now.tm_sec)
         time_str = now.strftime('%H:%M:%S')
         conn = SQL.make_connection()
@@ -65,7 +73,7 @@ def get_recent_minigame():
 
         time_string = str(rows[0]['Time']).replace(":", "시 ", 1).replace("00", "", -1).replace(":", "분", -1)
 
-        msg = "제일 빠른 시간의 미니게임입니다.\n```시간: {}\n".format(str(time_string))
+        msg = "요청하신 미니게임 정보입니다.\n```시간: {}\n".format(str(time_string))
 
         for i in minigame_list:
             msg += i + "\n"

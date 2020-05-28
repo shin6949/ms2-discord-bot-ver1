@@ -1,6 +1,5 @@
 import datetime
 import os
-
 import pymysql
 
 # 외부 파일
