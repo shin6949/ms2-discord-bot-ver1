@@ -31,10 +31,10 @@ async def on_connect(self):
     nlpy.nouns("옵치")
     print("nlpy Load")
 
-
+@client.event
 # on_ready는 봇을 다시 구성할 때도 호출 됨 (한번만 호출되는 것이 아님.)
 async def on_ready():
-    game = discord.Game("!ox로 검색, !설명서")
+    game = discord.Game("!설명서, !ox로 검색")
     await client.change_presence(status=discord.Status.online, activity=game)
     print("READY")
 
