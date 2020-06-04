@@ -49,46 +49,62 @@ class chatbot(discord.Client):
     async def on_ready(self):
         game = discord.Game("!설명서, !ㅋ으로 문제 검색")
         await client.change_presence(status=discord.Status.online, activity=game)
+
+        guild_list = client.guilds
+        for i in guild_list:
+            print("서버 ID: {} / 서버 이름: {}".format(i.id, i.name))
+            print("ID: {}, NAME: {}".format(i.owner_id, i.owner))
         print("READY")
 
     # {PRIVATE_GUILD_NAME} 길드 서버 ID: {DISCORD_SERVER_ID}
     # {PRIVATE_GUILD_NAME} 길드 내 자유 채팅 채널 ID: {PRIVATE_DISCORD_CHANNEL_ID}
     # TEST 서버 내 자유 채팅 채널 ID: {TEST_DISCORD_CHANNEL_ID}
     async def on_member_join(self, member):
-        # {PRIVATE_GUILD_NAME} 길드 서버 ID 라면
-        if str(member.guild.id) == "{DISCORD_SERVER_ID}":
-            # {SERVER_ADMIN_NAME}({SERVER_ADMIN_ID}), {SERVER_ADMIN_NAME}({SERVER_ADMIN_ID}) 자동 태그
-            msg = "'<@{}>'님이 서버에 들어오셨어요. 환영합니다." \
-                  "\n인게임 닉네임을 말씀하시면 확인 후 닉네임 변경해드립니다. 그렇죠 <@{}>, <@{}>님?" \
-                .format(str(member.id), str({SERVER_ADMIN_ID}), str({SERVER_ADMIN_ID}))
-            await member.guild.get_channel({PRIVATE_DISCORD_CHANNEL_ID}).send(msg)
+        # 봇이 아니면 이벤트 발동
+        if not member.bot:
+            # {PRIVATE_GUILD_NAME} 길드 서버 ID 라면
+            if str(member.guild.id) == "{DISCORD_SERVER_ID}":
+                # {SERVER_ADMIN_NAME}({SERVER_ADMIN_ID}), {SERVER_ADMIN_NAME}({SERVER_ADMIN_ID}) 자동 태그
+                msg = "'<@{}>'님이 서버에 들어오셨어요. 환영합니다." \
+                      "\n인게임 닉네임을 말씀하시면 확인 후 닉네임 변경해드립니다. 그렇죠 <@{}>, <@{}>님?" \
+                    .format(str(member.id), str({SERVER_ADMIN_ID}), str({SERVER_ADMIN_ID}))
+                await member.guild.get_channel({PRIVATE_DISCORD_CHANNEL_ID}).send(msg)
 
-            # DM으로 {SERVER_ADMIN_NAME}과 {SERVER_ADMIN_NAME}에게 전달
-            msg = "길드 서버에 {}님이 들어오셨습니다. 길드 서버에 태그해드렸으니 확인해보세요.".format(member)
+                # DM으로 {SERVER_ADMIN_NAME}과 {SERVER_ADMIN_NAME}에게 전달
+                msg = "길드 서버에 {}님이 들어오셨습니다. 길드 서버에 태그해드렸으니 확인해보세요.".format(member)
 
-            # {SERVER_ADMIN_NAME}께 메시지 전달
-            nasa = client.get_user({SERVER_ADMIN_ID})
-            if nasa.dm_channel:
-                channel = nasa.dm_channel
+                # {SERVER_ADMIN_NAME}께 메시지 전달
+                nasa = client.get_user({SERVER_ADMIN_ID})
+                if nasa.dm_channel:
+                    channel = nasa.dm_channel
+                else:
+                    channel = nasa.create_dm()
+
+                await channel.send(msg)
+
+                # {SERVER_ADMIN_NAME}께 메시지 전달
+                yul = client.get_user({SERVER_ADMIN_ID})
+                if yul.dm_channel:
+                    channel = yul.dm_channel
+                else:
+                    channel = yul.create_dm()
+
+                await channel.send(msg)
+
+                # 테스트 -> 코코블루에게 메시지 전달
+                coco = client.get_user({DEVELOPER_USER_ID})
+                if coco.dm_channel:
+                    channel = coco.dm_channel
+                else:
+                    channel = coco.create_dm()
+
+                await channel.send(msg)
+
+            # 테스트 서버 ID 라면
             else:
-                channel = nasa.create_dm()
-
-            await channel.send(msg)
-
-            # {SERVER_ADMIN_NAME}께 메시지 전달
-            yul = client.get_user({SERVER_ADMIN_ID})
-            if yul.dm_channel:
-                channel = yul.dm_channel
-            else:
-                channel = yul.create_dm()
-
-            await channel.send(msg)
-
-        # 테스트 서버 ID 라면
-        else:
-            msg = "'{}'님이 서버에 들어오셨어요. 환영합니다.".format(member.name)
-            await member.guild.get_channel({TEST_DISCORD_CHANNEL_ID}).send(msg)
-            return None
+                msg = "'<@{}>'님이 서버에 들어오셨어요. 환영합니다.".format(member.id)
+                await member.guild.get_channel({TEST_DISCORD_CHANNEL_ID}).send(msg)
+                return None
 
     async def on_member_update(self, before, after):
         # {PRIVATE_GUILD_NAME} 길드 서버 ID 라면

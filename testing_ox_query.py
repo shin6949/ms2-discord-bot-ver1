@@ -21,20 +21,33 @@ def analysis_query(keyword, nlpy):
     return nlpy.pos(keyword)
 
 
+def get_from_db(conn, query, mode):
+    curs = conn.cursor(pymysql.cursors.DictCursor)
+    curs.execute(query)
+    rows = curs.fetchall()
+
+    # AND 연산으로 못 찾아 냈을 경우 OR로 전환해서 최대한 많이 찾아봄.
+    if len(rows) == 0:
+        query = query.replace("AND", "OR", query.count("AND"))
+        curs.execute(query)
+        rows = curs.fetchall()
+        mode += "(오타 교정)"
+
+    return [rows, mode]
+
+
 def return_ox_msg(conn, keyword, mode, nlpy):
     try:
         sql_keyword = keyword.replace("'", "''", keyword.count("'"))
-        curs = conn.cursor(pymysql.cursors.DictCursor)
-
         query = "SELECT answer, problem FROM Problem WHERE "
 
         try:
             pos_list = analysis_query(sql_keyword, nlpy)
-            msg = "확장 검색 "
+            mode = "--확장 검색"
 
             query_list = []
             for i in pos_list:
-                if not i[1] == "Josa" or not i[1] == "Punctuation":
+                if not i[1] == "Josa" and not i[1] == "Punctuation":
                     query_list.append(i[0])
 
             for i in range(len(query_list)):
@@ -45,7 +58,7 @@ def return_ox_msg(conn, keyword, mode, nlpy):
 
         except FunctionTimedOut:
             query_list = sql_keyword.split(' ')
-            msg = "일반 검색 "
+            mode = "--일반 검색"
 
             for i in range(len(query_list)):
                 if i == len(query_list) - 1:
@@ -53,8 +66,9 @@ def return_ox_msg(conn, keyword, mode, nlpy):
                 else:
                     query += "problem LIKE \'%{}%\' AND ".format(query_list[i])
 
-        curs.execute(query)
-        rows = curs.fetchall()
+        result = get_from_db(conn, query, mode)
+        rows, msg = result[0], result[1]
+        msg += "--\n"
         conn.close()
 
         if len(rows) == 0:
@@ -66,7 +80,10 @@ def return_ox_msg(conn, keyword, mode, nlpy):
             return msg
 
         elif len(rows) > 30:
-            return "검색 결과가 30개가 넘어요!\n디스코드 내 최대 글자수 제한이 있어서 결과를 표시 할 수 없습니다. 좀 더 길게 검색해보세요."
+            if msg.count("(오타 교정)") > 0:
+                return "검색어에 오타가 있을 확률이 높습니다. 오타를 확인해주세요.\n* 오타를 감지하여 검색했지만 많은 값이 나와 표시할 수 없습니다."
+            else:
+                return "검색 결과가 30개가 넘어요!\n디스코드 내 최대 글자수 제한이 있어서 결과를 표시 할 수 없습니다. 좀 더 길게 검색해보세요."
         else:
             msg += "\"{}\"에 대한 검색 결과: {}개".format(keyword, len(rows))
 
@@ -109,7 +126,7 @@ def configure_SQL(keyword, mode, nlpy):
             else:
                 conn = public_SQL.make_connection()
 
-            msg = return_ox_msg(conn, keyword, mode)
+            msg = return_ox_msg(conn, keyword, mode, nlpy)
 
             if conn.open:
                 conn.close()
