@@ -78,6 +78,8 @@ def register_service(message):
     # 등록 진행
     conn = public_SQL.make_connection()
     try:
+        test = message.guild.id
+
         if not message.channel.permissions_for(message.author).administrator:
             return "이 기능은 관리자 외에는 설정할 수 없습니다."
 

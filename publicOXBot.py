@@ -40,7 +40,7 @@ async def on_connect():
 # 1분에 한번 수행될 작업
 # 여기 함수는 에러가 나도 에러 메시지가 출력되지 않으므로 주의.
 @tasks.loop(minutes=1)
-async def change_status():
+async def send_minigame_message():
     # 미니게임은 5분 또는 35분이므로, 0분, 30분에만 함수가 작동되도록 정의
     if datetime.datetime.now().minute == 0 or datetime.datetime.now().minute == 30:
         try:
@@ -68,10 +68,11 @@ async def change_status():
 @client.event
 # on_ready는 봇을 다시 구성할 때도 호출 됨 (한번만 호출되는 것이 아님.)
 async def on_ready():
-    change_status.start()
     game = discord.Game("!설명서, !ox로 검색")
     await client.change_presence(status=discord.Status.online, activity=game)
     print("READY")
+
+    send_minigame_message.start()
 
 
 # message respond
