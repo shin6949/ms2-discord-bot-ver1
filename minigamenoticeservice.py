@@ -68,7 +68,7 @@ def register_service(message):
         query_list[i] = int(re.findall("\d+", query_list[i])[0])
 
     # 0 ~ 24시까지의 범위인지 검사
-    if not (0 <= query_list[1] < 24) and (0 <= query_list[2] < 24):
+    if not (0 <= query_list[1] < 24) or not (0 <= query_list[2] < 24):
         return "설정 에러!\n올바른 범위를 입력하지 않으셨습니다. 올바른 숫자의 범위는 0 ~ 23입니다."
 
     # 시작 시간이 끝 시간보다 나중인가 검사
