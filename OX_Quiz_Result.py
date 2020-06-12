@@ -1,8 +1,8 @@
 import pymysql
 from func_timeout import FunctionTimedOut, func_set_timeout
 
-import SQL
 # 별도 파일
+import SQL
 import Write_error_log
 import public_SQL
 
@@ -52,7 +52,7 @@ def return_ox_msg(conn, keyword, mode, nlpy):
 
             for i in range(len(query_list)):
                 if i == len(query_list) - 1:
-                    query += "problem LIKE \'%{}%\'".format(query_list[i])
+                    query += "problem LIKE \'%{}%\' ORDER BY problem DESC".format(query_list[i])
                 else:
                     query += "problem LIKE \'%{}%\' AND ".format(query_list[i])
 
@@ -62,7 +62,7 @@ def return_ox_msg(conn, keyword, mode, nlpy):
 
             for i in range(len(query_list)):
                 if i == len(query_list) - 1:
-                    query += "problem LIKE \'%{}%\'".format(query_list[i])
+                    query += "problem LIKE \'%{}%\' ORDER BY problem DESC".format(query_list[i])
                 else:
                     query += "problem LIKE \'%{}%\' AND ".format(query_list[i])
 

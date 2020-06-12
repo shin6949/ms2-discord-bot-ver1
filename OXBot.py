@@ -2,7 +2,6 @@ import threading
 import time
 import urllib.request
 from pprint import pprint
-
 import discord
 import schedule
 from konlpy.tag import Okt
@@ -21,12 +20,11 @@ import guild_query
 
 # 메콩OX봇#5381
 
-
-def return_location():
+def return_location(self):
     return "GuildOXBot - OXBot.py"
 
 
-def judge_server(message):
+def judge_server(self, message):
     try:
         if not str(message.guild.id) == "{DISCORD_SERVER_ID}" and not str(message.guild.id) == "{DISCORD_SERVER_ID}":
             msg = "이 봇은 지정된 서버에서만 사용하실 수 있습니다."
@@ -45,12 +43,6 @@ class chatbot(discord.Client):
         nlpy = Okt(max_heap_size=79)
         nlpy.nouns("옵치")
         print("nlpy Load")
-
-        # 봇 시작 통보
-        msg = "봇이 시작되었습니다.\n사용중인 서버: {}개".format(len(client.guilds))
-        # DM으로 전달
-        cocoblue = await client.get_user({DEVELOPER_USER_ID}).create_dm()
-        await cocoblue.send(msg)
 
     # on_ready는 봇을 다시 구성할 때도 호출 됨 (한번만 호출되는 것이 아님.)
     async def on_ready(self):

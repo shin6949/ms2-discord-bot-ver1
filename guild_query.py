@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import pymysql
 
 # 별도 파일

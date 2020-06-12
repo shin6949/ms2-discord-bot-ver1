@@ -268,7 +268,6 @@ def get_person_ranking_search_by_keyword(gettype, keyword):
                 person['name'] = nickname
                 person['personmsg'] = tmp
                 person['imgurl'] = imgurl
-                print(imgurl)
 
                 ranking_table.append(person)
 
