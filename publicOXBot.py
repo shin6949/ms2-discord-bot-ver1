@@ -37,12 +37,13 @@ async def on_connect():
     print("nlpy Load")
 
 
-# 1분에 한번 수행될 작업
+# 1초에 한번 수행될 작업
 # 여기 함수는 에러가 나도 에러 메시지가 출력되지 않으므로 주의.
-@tasks.loop(minutes=1)
+@tasks.loop(seconds=1)
 async def change_status():
-    # 미니게임은 5분 또는 35분이므로, 0분, 30분에만 함수가 작동되도록 정의
-    if datetime.datetime.now().minute == 0 or datetime.datetime.now().minute == 30:
+    # 미니게임은 5분 또는 35분이므로, 0분, 30분 0초에만 함수가 작동되도록 정의
+    if datetime.datetime.now().second == 0 and (
+            datetime.datetime.now().minute == 0 or datetime.datetime.now().minute == 30):
         try:
             subscriber = minigamenoticeservice.get_subscriber()
             msg = Mini.get_recent_minigame()
@@ -60,6 +61,9 @@ async def change_status():
                     await dm_channel.send(msg)
                 except Exception as e:
                     minigamenoticeservice.error_handling(i, "DM")
+
+            # 1초 sleep하여 중복 전송 방치
+            time.sleep(1)
 
         except Exception as e:
             print(e)
