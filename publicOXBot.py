@@ -40,7 +40,7 @@ async def on_connect():
 # 1초에 한번 수행될 작업
 # 여기 함수는 에러가 나도 에러 메시지가 출력되지 않으므로 주의.
 @tasks.loop(seconds=1)
-async def change_status():
+async def send_minigame_message():
     # 미니게임은 5분 또는 35분이므로, 0분, 30분 0초에만 함수가 작동되도록 정의
     if datetime.datetime.now().second == 0 and (
             datetime.datetime.now().minute == 0 or datetime.datetime.now().minute == 30):
@@ -53,7 +53,7 @@ async def change_status():
                     guild_channel = client.get_guild(int(i[0])).get_channel(int(i[1]))
 
                     if str(msg['status']) == 'success':
-                        await guild_channel.send(embed=msg['message'])
+                        await guild_channel.send(embed=msg['message'], delete_after=60.0)
 
                 except Exception as e:
                     minigamenoticeservice.error_handling(i[0], "Server")
@@ -78,10 +78,11 @@ async def change_status():
 @client.event
 # on_ready는 봇을 다시 구성할 때도 호출 됨 (한번만 호출되는 것이 아님.)
 async def on_ready():
-    change_status.start()
     game = discord.Game("!설명서, !ox로 검색")
     await client.change_presence(status=discord.Status.online, activity=game)
     print("READY")
+
+    send_minigame_message.start()
 
 
 # message respond
@@ -180,12 +181,13 @@ async def on_message(message):
         msg = Mini.get_recent_minigame()
 
         if str(msg['status']) == 'success':
-            await channel.send(Offer_Process_Time.configure(start, "", message), embed=msg['message'])
+            await channel.send(Offer_Process_Time.configure(start, "", message), embed=msg['message'],
+                               delete_after=60.0)
             public_query.log_upload(message, "Minigame", msg['log'], str(time.time() - start))
             return None
         else:
             msg['message'] += Offer_Process_Time.configure(start, msg['message'], message)
-            await channel.send(msg['message'])
+            await channel.send(msg['message'], delete_after=60.0)
             public_query.log_upload(message, "Minigame", msg['message'], str(time.time() - start))
             return None
 
