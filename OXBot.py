@@ -2,14 +2,15 @@ import threading
 import time
 import urllib.request
 from pprint import pprint
+
 import discord
 import schedule
 from konlpy.tag import Okt
 
 # 별도 파일
 import Calculator
-import Mini
 import Morning_Task
+import NewMinigame as Mini
 import OX_Quiz_Result
 import Offer_Process_Time
 import Write_error_log
@@ -20,11 +21,12 @@ import guild_query
 
 # 메콩OX봇#5381
 
-def return_location(self):
+
+def return_location():
     return "GuildOXBot - OXBot.py"
 
 
-def judge_server(self, message):
+def judge_server(message):
     try:
         if not str(message.guild.id) == "{DISCORD_SERVER_ID}" and not str(message.guild.id) == "{DISCORD_SERVER_ID}":
             msg = "이 봇은 지정된 서버에서만 사용하실 수 있습니다."
@@ -43,6 +45,12 @@ class chatbot(discord.Client):
         nlpy = Okt(max_heap_size=79)
         nlpy.nouns("옵치")
         print("nlpy Load")
+
+        # 봇 시작 통보
+        msg = "봇이 시작되었습니다.\n사용중인 서버: {}개".format(len(client.guilds))
+        # DM으로 전달
+        cocoblue = await client.get_user({DEVELOPER_USER_ID}).create_dm()
+        await cocoblue.send(msg)
 
     # on_ready는 봇을 다시 구성할 때도 호출 됨 (한번만 호출되는 것이 아님.)
     async def on_ready(self):
@@ -156,9 +164,14 @@ class chatbot(discord.Client):
                 return None
 
             msg = Mini.get_recent_minigame()
-            msg = Offer_Process_Time.configure(start, msg, message)
-            await channel.send(msg)
-            return None
+
+            if str(msg['status']) == 'success':
+                await channel.send(Offer_Process_Time.configure(start, "", message), embed=msg['message'])
+                return None
+            else:
+                msg['message'] += Offer_Process_Time.configure(start, msg['message'], message)
+                await channel.send(msg['message'])
+                return None
 
         # 다음 미니게임 시간표
         if message.content == "!다음미겜":
@@ -171,9 +184,14 @@ class chatbot(discord.Client):
                 return None
 
             msg = Mini.get_next_minigame()
-            msg = Offer_Process_Time.configure(start, msg, message)
-            await channel.send(msg)
-            return None
+            if str(msg['status']) == 'success':
+                await channel.send(Offer_Process_Time.configure(start, "", message), embed=msg['message'])
+                print(msg['message'])
+                return None
+            else:
+                msg['message'] += Offer_Process_Time.configure(start, msg['message'], message)
+                await channel.send(msg['message'])
+                return None
 
         # OX 퀴즈 검색하기
         if message.content == '!ox' or message.content == '!OX' or message.content == '!퀴즈' or message.content == '!ㅋ' or message.content == '!q':

@@ -7,7 +7,7 @@ from konlpy.tag import Okt
 
 # 별도 파일들
 import Calculator
-import Mini
+import NewMinigame as Mini
 import OX_Quiz_Result
 import Offer_Process_Time
 import get_Boss
@@ -51,18 +51,24 @@ async def change_status():
             for i in subscriber[0]:
                 try:
                     guild_channel = client.get_guild(int(i[0])).get_channel(int(i[1]))
-                    await guild_channel.send(msg)
+
+                    if str(msg['status']) == 'success':
+                        await guild_channel.send(embed=msg['message'])
+
                 except Exception as e:
                     minigamenoticeservice.error_handling(i[0], "Server")
 
             for i in subscriber[1]:
                 try:
                     dm_channel = await client.get_user(int(i)).create_dm()
-                    await dm_channel.send(msg)
+
+                    if str(msg['status']) == 'success':
+                        await dm_channel.send(embed=msg['message'])
+
                 except Exception as e:
                     minigamenoticeservice.error_handling(i, "DM")
 
-            # 1초 sleep하여 중복 전송 방치
+            # 1초 sleep하여 중복 전송 방지
             time.sleep(1)
 
         except Exception as e:
@@ -172,10 +178,16 @@ async def on_message(message):
             return None
 
         msg = Mini.get_recent_minigame()
-        msg = Offer_Process_Time.configure(start, msg, message)
-        await channel.send(msg, delete_after=60.0)
-        public_query.log_upload(message, "Minigame", msg, str(time.time() - start))
-        return None
+
+        if str(msg['status']) == 'success':
+            await channel.send(Offer_Process_Time.configure(start, "", message), embed=msg['message'])
+            public_query.log_upload(message, "Minigame", msg['log'], str(time.time() - start))
+            return None
+        else:
+            msg['message'] += Offer_Process_Time.configure(start, msg['message'], message)
+            await channel.send(msg['message'])
+            public_query.log_upload(message, "Minigame", msg['message'], str(time.time() - start))
+            return None
 
     # 다음 미니게임 시간표
     if message.content == "!다음미겜":
@@ -183,8 +195,17 @@ async def on_message(message):
             return None
 
         msg = Mini.get_next_minigame()
-        msg = Offer_Process_Time.configure(start, msg, message)
-        await channel.send(msg, delete_after=60.0)
+
+        if str(msg['status']) == 'success':
+            await channel.send(Offer_Process_Time.configure(start, "", message), embed=msg['message'])
+            public_query.log_upload(message, "Minigame", msg['log'], str(time.time() - start))
+            return None
+        else:
+            msg['message'] += Offer_Process_Time.configure(start, msg['message'], message)
+            await channel.send(msg['message'])
+            public_query.log_upload(message, "Minigame", msg['message'], str(time.time() - start))
+            return None
+
         return None
 
     # 커스텀 메시지
