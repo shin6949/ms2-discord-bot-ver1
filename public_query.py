@@ -71,10 +71,14 @@ def log_upload(message, querytype, respond, processtime):
         print(e)
 
 
-def return_custom_msg(message, conn):
+def return_custom_msg(message, conn, mode):
     try:
         curs = conn.cursor(pymysql.cursors.DictCursor)
-        query = "SELECT Respond FROM PublicVerCustomRespond WHERE Command = '{}'".format(message.content)
+        if mode == 1:
+            query = "SELECT Respond FROM PublicVerCustomRespond WHERE Command = '{}'".format(message.content)
+        else:
+            query = "SELECT Respond FROM PublicVerCustomRespond WHERE Command = '{}' AND hidden = FALSE".format(
+                message.content)
         curs.execute(query)
         rows = curs.fetchall()
 
@@ -88,12 +92,17 @@ def return_custom_msg(message, conn):
         return "False"
 
 
-def get_custom_query(message):
+def get_custom_query(message, mode):
     try:
         conn = public_SQL.make_connection()
-        msg = return_custom_msg(message, conn)
+        if mode == 1:
+            msg = return_custom_msg(message, conn, 1)
+        else:
+            msg = return_custom_msg(message, conn, 0)
+
         if conn.open:
             conn.close()
+
         return msg
 
     except Exception as e:

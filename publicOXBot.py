@@ -199,23 +199,28 @@ async def on_message(message):
         msg = Mini.get_next_minigame()
 
         if str(msg['status']) == 'success':
-            await channel.send(Offer_Process_Time.configure(start, "", message), embed=msg['message'])
+            await channel.send(Offer_Process_Time.configure(start, "", message), embed=msg['message'],
+                               delete_after=60.0)
             public_query.log_upload(message, "Minigame", msg['log'], str(time.time() - start))
             return None
         else:
             msg['message'] += Offer_Process_Time.configure(start, msg['message'], message)
-            await channel.send(msg['message'])
+            await channel.send(msg['message'], delete_after=60.0)
             public_query.log_upload(message, "Minigame", msg['message'], str(time.time() - start))
             return None
-
-        return None
 
     # 커스텀 메시지
     if message.content.startswith("!"):
         if publicJudgeBan.judge(message):
             return None
 
-        msg = public_query.get_custom_query(message)
+        try:
+            if str(message.guild.id) == "{DISCORD_SERVER_ID}" or str(message.guild.id) == "{DISCORD_SERVER_ID}":
+                msg = public_query.get_custom_query(message, 1)
+            else:
+                msg = public_query.get_custom_query(message, 0)
+        except AttributeError:
+            msg = public_query.get_custom_query(message, 0)
 
         if not msg == "False":
             msg = Offer_Process_Time.configure(start, msg, message)
