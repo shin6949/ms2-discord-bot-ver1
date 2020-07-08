@@ -1,0 +1,17 @@
+# Created by .ignore support plugin (hsz.mobi)
+!/public_SQL.py
+!/SQL.py
+.DS_Store
+.idea/.gitignore
+.idea/OXBot.iml
+.idea/codeStyles/
+.idea/dataSources.local.xml
+.idea/dataSources.xml
+.idea/dataSources/
+.idea/inspectionProfiles/
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+__pycache__/
+error.txt
+macvenv/

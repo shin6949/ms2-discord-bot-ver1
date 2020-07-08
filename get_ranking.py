@@ -1,13 +1,13 @@
-from bs4 import BeautifulSoup
-import math
-from collections import defaultdict
+import re
+import urllib.request
+
 import requests
+from bs4 import BeautifulSoup
 
 # 별도 파일
 import Write_error_log
 
 
-# TODO: 소스 정리 필요
 def return_location():
     return "GuildOXBot - get_ranking.py"
 
@@ -58,9 +58,11 @@ def return_html_source(mode, type, keyword):
                 # 종합 개인 트로피 순위 1페이지를 요청한 경우
                 url = "http://maplestory2.nexon.com/Rank/Character?tp=daily"
 
+    # 위에서 구성한 url을 토대로 html 구조를 가져옴
     return BeautifulSoup(html_source_request(url), 'html.parser').select("tbody")[0]
 
 
+# 길드 랭킹 1페이지
 def get_guild_ranking(gettype):
     try:
         if gettype == "realtime":
@@ -70,7 +72,11 @@ def get_guild_ranking(gettype):
 
         ranking = html.find_all("tr")
         ranking_table = []
+        # 1, 2, 3위는 html element에 순위가 표시되지 않으므로 int로 구성함
         count = 1
+
+        # 결과 set 구성
+        result = {'status': 'success', 'msg': ''}
 
         for i in ranking:
             guild_name = i.find_all("td")[1].get_text()
@@ -88,18 +94,21 @@ def get_guild_ranking(gettype):
             count += 1
             ranking_table.append(tmp)
 
-        msg = ""
         for i in ranking_table:
-            msg += i
+            result['msg'] += i
 
-        return msg
+        return result
 
+    # 1페이지는 무조건 존재하므로 에러가 발생하면, 코드 또는 서버 문제임
     except Exception as e:
         Write_error_log.write_log(return_location(), str(e))
-        print(e)
-        return "서버 내 문제로 인해 불러올 수 없습니다."
+
+        result = {'status': 'error', 'msg': "서버 내 문제로 인해 불러올 수 없습니다."}
+
+        return result
 
 
+# 주어진 키워드를 기반으로 길드 순위를 찾는 함수
 def get_guild_ranking_search_by_keyword(gettype, keyword):
     try:
         if gettype == "realtime":
@@ -107,91 +116,50 @@ def get_guild_ranking_search_by_keyword(gettype, keyword):
         else:
             html = return_html_source("Guild", "", keyword)
 
-        try:
-            ranking = html.find_all("tr")
+        result = {'status': 'success'}
+        # tr에 있는 것들은 모두 순위임
+        ranking = html.find_all("tr")
 
-            ranking_table = []
-            for ranking_list in ranking:
-                guild = defaultdict(str)
-                guild_name = ranking_list.find_all("td")[1].get_text()
-                guild_leader = ranking_list.find_all("td")[2].get_text()
-                guild_trop = ranking_list.find_all("td")[3].get_text()
+        # 이름으로 검색하는 경우, 일치 검색이므로 결과는 하나 뿐임
+        # 길드 순위 -> 1,2,3위의 경우 순위 부분이 "길드이미지"라고 되어 있어서 다른 부분에서 순위와 이미지를 갖고옴.
+        if ranking[0].find_all("img")[0]['alt'] == "길드이미지":
+            # 순위 -> 1, 2, 3위는 "위"라는 글자까지 저장되므로 숫자만 추출함.
+            result['rank'] = re.findall("\d+", ranking[0].find_all("td")[0].get_text())[0]
 
-                if ranking_list.find_all("img")[0]['alt'] == "길드이미지":
-                    ranking = ranking_list.find_all("td")[0].get_text()
-                    
-                    tmp = "```[{}위] {}\n길드장: {}\n길드 트로피: {}개```".format(ranking, guild_name, guild_leader, str(guild_trop))
+            if not html.find_all("img")[0]['src'] == "http://ua.maplestory2.nx.com/":
+                result['imgurl'] = html.find_all("img")[0]['src']
+            else:
+                result['imgurl'] = "http://s.nx.com/S2/Game/maplestory2/MAVIEW/data/character/ico_defalt.gif"
+        else:
+            result['rank'] = ranking[0].find_all("img")[0]['alt']
+            try:
+                result['imgurl'] = html.find_all("img")[1]['src']
+            except:
+                result['imgurl'] = "http://s.nx.com/S2/Game/maplestory2/MAVIEW/data/character/ico_defalt.gif"
 
-                    if not html.find_all("img")[0]['src'] == "http://ua.maplestory2.nx.com/":
-                        imgurl = html.find_all("img")[0]['src']
-                    else:
-                        imgurl = "http://s.nx.com/S2/Game/maplestory2/MAVIEW/data/character/ico_defalt.gif"
-                else:
-                    ranking = ranking_list.find_all("img")[0]['alt']
-                    tmp = "```[{}] {}\n길드장: {}\n길드 트로피: {}개```".format(ranking, guild_name, guild_leader, str(guild_trop))
+        # 길드 이름
+        result['name'] = ranking[0].find_all("td")[1].get_text()
+        # 길드 장
+        result['leader'] = ranking[0].find_all("td")[2].get_text()
+        # 길드 트로피
+        result['trop'] = ranking[0].find_all("td")[3].get_text()
 
-                    try:
-                        imgurl = html.find_all("img")[1]['src']
-                    except:
-                        imgurl = "http://s.nx.com/S2/Game/maplestory2/MAVIEW/data/character/ico_defalt.gif"
+        urllib.request.urlretrieve(result['imgurl'], result['name'] + ".png")
 
-                guild['name'] = guild_name
-                guild['guildmsg'] = tmp
-                guild['imgurl'] = imgurl
+        return result
 
-                ranking_table.append(guild)
+    # 찾는 길드가 없는 경우 IndexError가 발생
+    except IndexError:
+        return {'status': 'error', 'msg': "찾는 길드는 없는 길드 입니다."}
 
-            return ranking_table
-
-        except:
-            return "찾는 길드는 없는 길드 입니다."
-
+    # 기타 에러인 경우, 서버 또는 코드 문제임
     except Exception as e:
         Write_error_log.write_log(return_location(), str(e))
 
-        return "서버 내 문제로 인해 불러올 수 없습니다."
+        return {'status': 'error', 'msg': "서버 내 문제로 인헤 불러올 수 없습니다."}
 
 
-# 현재는 사용하지 않는 코드 (특정 순위 길드 찾기)
-def get_guild_ranking_search_by_number(gettype, num):
-    # ex) 465위 = 47페이지에서 찾아야함.
-
-    page = math.trunc((int(num) / 10) + 1)
-
-    try:
-        url = "http://maplestory2.nexon.com/Rank/Guild"
-        url += "?page=" + str(page)
-
-        if gettype == "realtime":
-            url += "&tp=realtime"
-
-        html = BeautifulSoup(html_source_request(url), 'html.parser').select("tbody")[0]
-        try:
-            ranking = html.find_all("tr")
-
-            ranking_table = []
-            for ranking_list in ranking:
-                if ranking_list.find_all("td")[0].get_text() == str(num):
-                    tmp = "```[" + ranking_list.find_all("td")[0].get_text() + "위] " + ranking_list.find_all("td")[1].get_text() + \
-                          "\n길드장: " + ranking_list.find_all("td")[2].get_text() + "" \
-                          "\n길드 트로피: " + ranking_list.find_all("td")[3].get_text() + "개```"
-
-                    ranking_table.append(tmp)
-
-            msg = ""
-            for i in ranking_table:
-                msg += i
-
-            return msg
-
-        except:
-            return "찾는 길드는 없는 길드 입니다."
-
-    except Exception as e:
-        Write_error_log.write_log(return_location(), str(e))
-        return "서버 내 문제로 인해 불러올 수 없습니다."
-
-
+# 개인 트로피 1페이지를 구해오는 함수
 def get_person_ranking(gettype):
     try:
         if gettype == "realtime":
@@ -201,7 +169,10 @@ def get_person_ranking(gettype):
 
         ranking = html.find_all("tr")
         ranking_table = []
+        # 1, 2, 3위는 html element에 순위가 표시되지 않으므로 int로 구성함
         count = 1
+
+        result = {'status': 'success', 'msg': ''}
 
         for ranking_list in ranking:
             nickname = ranking_list.find_all("td")[1].get_text()
@@ -220,18 +191,19 @@ def get_person_ranking(gettype):
 
             ranking_table.append(tmp)
 
-        msg = ""
         for i in ranking_table:
-            msg += i
+            result['msg'] += i
 
-        return msg
+        return result
 
+    # 1페이지는 무조건 존재하므로 에러가 발생하면, 코드 또는 서버 문제임
     except Exception as e:
         Write_error_log.write_log(return_location(), str(e))
 
-        return "서버 내 문제로 인해 불러올 수 없습니다."
+        return {'result': 'error', 'msg': "서버 내 문제로 인해 불러올 수 없습니다."}
 
 
+# 키워드 기반 캐릭터 순위 검색
 def get_person_ranking_search_by_keyword(gettype, keyword):
     try:
         if gettype == "realtime":
@@ -239,84 +211,51 @@ def get_person_ranking_search_by_keyword(gettype, keyword):
         else:
             html = return_html_source("Person", "", keyword)
 
-        try:
-            ranking = html.find_all("tr")
-            ranking_table = []
+        result = {'status': 'success'}
+        # tr에 있는 것들은 모두 순위임
+        ranking = html.find_all("tr")
 
-            for ranking_list in ranking:
-                person = defaultdict(str)
-                nickname = ranking_list.find_all("td")[1].get_text()
-                person_trop = ranking_list.find_all("td")[2].get_text()
+        result['num'] = len(ranking)
 
-                if ranking_list.find_all("td")[0].get_text() == "":
-                    ranking_num = ranking_list.find_all("img")[0]['alt']
-                    tmp = "```[{}위] {}\n트로피: {}개```".format(ranking_num, nickname, person_trop)
+        """
+        닉네임 초기화로 인해, 닉네임 하나에 2개의 캐릭터가 검색되는 경우가 있음.
+        이 봇을 통해 닉네임을 검색하는 경우는 트로피를 비교하기 위해서이므로, 대부분 트로피가 많을 것임. 그러므로 많은 사람을 기준으로 검색
+        캐릭터는 트로피가 많은 순으로 등장하기 때문에 index 0를 기준으로 가져오면 됨
+        """
 
-                    try:
-                        imgurl = html.find_all("img")[1]['src']
-                    except:
-                        imgurl = "http://s.nx.com/S2/Game/maplestory2/MAVIEW/data/character/ico_defalt.gif"
-                else:
-                    ranking_num = ranking_list.find_all("td")[0].get_text()
-                    tmp = "```[{}위] {}\n트로피: {}개```".format(ranking_num, nickname, person_trop)
+        # 닉네임
+        result['nickname'] = ranking[0].find_all("td")[1].get_text()
+        # 트로피 개수
+        result['trop'] = ranking[0].find_all("td")[2].get_text()
 
-                    try:
-                        imgurl = html.find_all("img")[0]['src']
-                    except:
-                        imgurl = "http://s.nx.com/S2/Game/maplestory2/MAVIEW/data/character/ico_defalt.gif"
+        # 1, 2, 3위의 경우 문제가 있으므로 예외 처리
+        if ranking[0].find_all("td")[0].get_text() == "":
+            # 순위 -> 1, 2, 3위는 "위"라는 글자까지 저장되므로 숫자만 추출함.
+            result['rank'] = re.findall("\d+", ranking[0].find_all("img")[0]['alt'])[0]
 
-                person['name'] = nickname
-                person['personmsg'] = tmp
-                person['imgurl'] = imgurl
+            # 프로필 사진 링크
+            try:
+                result['imgurl'] = html.find_all("img")[1]['src']
+            except:
+                result['imgurl'] = "http://s.nx.com/S2/Game/maplestory2/MAVIEW/data/character/ico_defalt.gif"
+        else:
+            # 순위 -> 1, 2, 3위는 "위"라는 글자까지 저장되므로 숫자만 추출함.
+            result['rank'] = re.findall("\d+", ranking[0].find_all("td")[0].get_text())[0]
 
-                ranking_table.append(person)
+            # 프로필 사진 링크
+            try:
+                result['imgurl'] = html.find_all("img")[0]['src']
+            except:
+                result['imgurl'] = "http://s.nx.com/S2/Game/maplestory2/MAVIEW/data/character/ico_defalt.gif"
 
-            return ranking_table
+        urllib.request.urlretrieve(result['imgurl'], result['nickname'] + ".png")
 
-        except:
-            return "찾는 캐릭터는 없는 캐릭터 입니다."
+        return result
 
-    except Exception as e:
-        Write_error_log.write_log(return_location(), str(e))
-
-        return "서버 내 문제로 인해 불러올 수 없습니다."
-
-
-# 지금은 사용하지 않는 기능 (순위로 찾기)
-def get_person_ranking_search_by_number(gettype, num):
-    # ex) 465위 = 47페이지에서 찾아야함.
-
-    page = math.trunc((int(num) / 10) + 1)
-
-    try:
-        url = "http://maplestory2.nexon.com/Rank/Character"
-        url += "?page=" + str(page)
-
-        if gettype == "realtime":
-            url += "&tp=realtime"
-
-        html = BeautifulSoup(html_source_request(url), 'html.parser').select("tbody")[0]
-        try:
-            ranking = html.find_all("tr")
-
-            ranking_table = []
-            for ranking_list in ranking:
-                if ranking_list.find_all("td")[0].get_text() == str(num):
-                    tmp = "```[" + ranking_list.find_all("td")[0].get_text() + "위] " + ranking_list.find_all("td")[1].get_text() + \
-                          "\n트로피: " + ranking_list.find_all("td")[2].get_text() + "개```"
-
-                    ranking_table.append(tmp)
-
-            msg = ""
-            for i in ranking_table:
-                msg += i
-
-            return msg
-
-        except:
-            return "찾는 캐릭터는 없는 캐릭터 입니다."
+    except IndexError:
+        return {'status': 'IndexError', 'msg': "찾는 캐릭터는 없는 캐릭터 입니다."}
 
     except Exception as e:
         Write_error_log.write_log(return_location(), str(e))
-        return "서버 내 문제로 인해 불러올 수 없습니다."
 
+        return {'status': 'error', 'msg': "서버 내 문제로 인해 불러올 수 없습니다."}

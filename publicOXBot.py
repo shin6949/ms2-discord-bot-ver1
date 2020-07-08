@@ -11,6 +11,7 @@ import NewMinigame as Mini
 import OX_Quiz_Result
 import Offer_Process_Time
 import get_Boss
+import get_ranking
 import minigamenoticeservice
 import publicJudgeBan
 import public_query
@@ -25,14 +26,14 @@ token = "{DISCORD_BOT_TOKEN}"
 
 
 # Dev Token
-# token = "{DISCORD_BOT_TOKEN}"
+token = "{DISCORD_BOT_TOKEN}"
 
 
 # Bot initialize
 @client.event
 # 처음 켰을 때 호출되는 함수
 async def on_connect():
-    nlpy = Okt(max_heap_size=79)
+    nlpy = Okt()
     nlpy.nouns("옵치")
     print("nlpy Load")
 
@@ -153,7 +154,7 @@ async def on_message(message):
         if publicJudgeBan.judge(message):
             return None
 
-        nlpy = Okt(max_heap_size=79)
+        nlpy = Okt()
 
         msg = OX_Quiz_Result.get(message, "Public", nlpy)
         msg = Offer_Process_Time.configure(start, msg, message)
@@ -209,6 +210,194 @@ async def on_message(message):
             public_query.log_upload(message, "Minigame", msg['message'], str(time.time() - start))
             return None
 
+    # 길드 트로피 1페이지 순위를 요청한 경우
+    if message.content == "!길트" or message.content == "!길트 " or message.content == "!길트종 " or message.content == "!길트종":
+        channel = message.channel
+
+        # 허용된 서버에서 사용하는지 확인
+        try:
+            if (not str(message.guild.id) == "{DISCORD_SERVER_ID}") and (
+            not str(message.guild.id) == "{DISCORD_SERVER_ID}"):
+                print("지정된 서버가 아님.")
+                return None
+        # DM인 경우
+        except AttributeError:
+            return None
+
+        # 실시간 순위를 요청한 경우
+        if message.content == "!길트" or message.content == "!길트 ":
+            # 결과를 구해옴
+            result = get_ranking.get_guild_ranking("realtime")
+        # 종합 순위를 요청한 경우
+        else:
+            # 결과를 구해옴
+            result = get_ranking.get_guild_ranking("None")
+
+        # 받은 결과를 토대로 메시지 전달
+        result['msg'] = Offer_Process_Time.configure(start, result['msg'], message)
+
+        # 종합 순위인 경우 알림 메시지 추가
+        if message.content == "!길트종 " or message.content == "!길트종":
+            result['msg'] = "-이 순위는 종합 순위로 하루에 한번 업데이트 됩니다.-\n" + result['msg']
+            await channel.send(result['msg'])
+        else:
+            await channel.send(result['msg'])
+
+        if str(result['status']) == "success":
+            public_query.log_upload(message, "길트", result['msg'], str(time.time() - start))
+        elif str(result['status']) == "error":
+            public_query.log_upload(message, "길트(error)", result['msg'], str(time.time() - start))
+
+        return None
+
+    # 특정 길드의 순위를 확인하는 경우
+    if message.content.startswith("!길트 ") or message.content.startswith("!길트종 "):
+        channel = message.channel
+
+        # 허용된 서버에서 사용하는지 확인
+        try:
+            if (not str(message.guild.id) == "{DISCORD_SERVER_ID}") and (
+            not str(message.guild.id) == "{DISCORD_SERVER_ID}"):
+                print("지정된 서버가 아님.")
+                return None
+        # DM인 경우
+        except AttributeError:
+            return None
+
+        # 실시간 순위를 원하는 경우
+        if message.content.startswith("!길트 "):
+            # 순위를 가져옴
+            result = get_ranking.get_guild_ranking_search_by_keyword("realtime", message.content.replace("!길트 ", "", 1))
+        # 종합 순위를 요청하는 경우
+        else:
+            # 결과를 갖고 옴
+            result = get_ranking.get_guild_ranking_search_by_keyword("None",
+                                                                     message.content.replace("!길트종 ", "", 1))
+
+        # 에러가 발생한 경우
+        if str(result['status']) == "error":
+            result['msg'] = Offer_Process_Time.configure(start, result['msg'], message)
+            await channel.send(result['msg'])
+            public_query.log_upload(message, "길트(error)", result['msg'], str(time.time() - start))
+            return None
+
+        file = discord.File(result['name'] + ".png", filename="guildimage.png")
+
+        # 에러가 아닌 경우 제대로 받아온 것이므로 결과를 기반으로 메시지 구성
+        embed = discord.Embed(title="길드 검색 결과", description="  ", color=0x00ff56)
+        embed.set_thumbnail(url="attachment://guildimage.png")
+        embed.add_field(name="이름", value=str(result['name']), inline=True)
+        embed.add_field(name="순위", value=str(result['rank']) + "위", inline=True)
+        embed.add_field(name="길드장", value=str(result['leader']), inline=True)
+        embed.add_field(name="길드 트로피", value=str(result['trop']) + "개", inline=True)
+
+        # 종합 순위를 요청한 경우
+        if message.content.startswith("!길트종 "):
+            await channel.send("-이 순위는 종합 순위로 하루에 한번 업데이트 됩니다.-" +
+                               Offer_Process_Time.configure(start, "", message), embed=embed, file=file)
+        else:
+            await channel.send(Offer_Process_Time.configure(start, "", message), embed=embed, file=file)
+
+        return None
+
+    # 개인 트로피 순위 1페이지를 요청한 경우
+    if message.content == "!개트" or message.content == "!개트 " or message.content == "!개트종" or message.content == "!개트종 ":
+        channel = message.channel
+
+        # 허용된 서버에서 사용하는지 확인
+        try:
+            if not str(message.guild.id) == "{DISCORD_SERVER_ID}" or not str(message.guild.id) == "{DISCORD_SERVER_ID}":
+                print("지정된 서버가 아님.")
+                return None
+        # DM인 경우
+        except AttributeError:
+            return None
+
+        # 실시간 순위를 요구한 경우
+        if message.content == "!개트" or message.content == "!개트 ":
+            result = get_ranking.get_person_ranking("realtime")
+        # 종합 순위를 요구한 경우
+        else:
+            result = get_ranking.get_person_ranking("None")
+
+        result['msg'] = Offer_Process_Time.configure(start, result['msg'], message)
+
+        # 종합 순위를 요구한 경우
+        if message.content == "!개트종" or message.content == "!개트종 ":
+            result['msg'] = "-이 순위는 종합 순위로 하루에 한번 업데이트 됩니다.-" + result['msg']
+            # 메시지 전송
+            await channel.send(result['msg'])
+        # 실시간 순위를 요구한 경우
+        else:
+            # 메시지 전송
+            await channel.send(result['msg'])
+
+        if str(result['status']) == "success":
+            public_query.log_upload(message, "개트", result['msg'], str(time.time() - start))
+        elif str(result['status']) == "error":
+            public_query.log_upload(message, "개트(error)", result['msg'], str(time.time() - start))
+
+        return None
+
+    # 특정 캐릭터의 순위를 요구한 경우
+    if message.content.startswith("!개트 ") or message.content.startswith("!개트종 "):
+        channel = message.channel
+
+        # 허용된 서버에서 사용하는지 확인
+        try:
+            if (not str(message.guild.id) == "{DISCORD_SERVER_ID}") and (
+            not str(message.guild.id) == "{DISCORD_SERVER_ID}"):
+                print("지정된 서버가 아님.")
+                return None
+        # DM인 경우
+        except AttributeError:
+            return None
+
+        # 실시간 순위를 원하는 경우
+        if message.content.startswith("!개트 "):
+            # 순위를 가져옴
+            result = get_ranking.get_person_ranking_search_by_keyword("realtime",
+                                                                      message.content.replace("!개트 ", "", 1))
+        # 종합 순위를 요청하는 경우
+        else:
+            # 결과를 갖고 옴
+            result = get_ranking.get_person_ranking_search_by_keyword("None",
+                                                                      message.content.replace("!개트종 ", "", 1))
+
+        # 에러가 발생한 경우
+        if str(result['status']) == "error":
+            result['msg'] = Offer_Process_Time.configure(start, result['msg'], message)
+            await channel.send(result['msg'])
+            public_query.log_upload(message, "개트(error)", result['msg'], str(time.time() - start))
+            return None
+
+        file = discord.File(result['nickname'] + ".png", filename="profileimage.png")
+
+        # 에러가 아닌 경우 제대로 받아온 것이므로 결과를 기반으로 메시지 구성
+        embed = discord.Embed(title="캐릭터 검색 결과", description="  ", color=0x00ff56)
+        embed.set_thumbnail(url="attachment://profileimage.png")
+        embed.add_field(name="닉네임", value=str(result['nickname']), inline=True)
+        embed.add_field(name="순위", value=str(result['rank']) + "위", inline=True)
+        embed.add_field(name="트로피", value=str(result['trop']) + "개", inline=True)
+
+        # 종합 순위를 요청한 경우
+        if message.content.startswith("!개트종 "):
+            if result['num'] > 1:
+                await channel.send("검색 결과에 닉네임이 중복된 캐릭터가 발견되었습니다. 트로피가 제일 많은 캐릭터를 표시합니다.\n"
+                                   "-이 순위는 종합 순위로 하루에 한번 업데이트 됩니다.-" +
+                                   Offer_Process_Time.configure(start, "", message), embed=embed, file=file)
+            else:
+                await channel.send("-이 순위는 종합 순위로 하루에 한번 업데이트 됩니다.-" +
+                                   Offer_Process_Time.configure(start, "", message), embed=embed, file=file)
+        else:
+            if result['num'] > 1:
+                await channel.send("검색 결과에 닉네임이 중복된 캐릭터가 발견되었습니다. 트로피가 제일 많은 캐릭터를 표시합니다." +
+                                   Offer_Process_Time.configure(start, "", message), embed=embed, file=file)
+            else:
+                await channel.send(Offer_Process_Time.configure(start, "", message), embed=embed, file=file)
+
+        return None
+
     # 커스텀 메시지
     if message.content.startswith("!"):
         if publicJudgeBan.judge(message):
@@ -229,6 +418,5 @@ async def on_message(message):
             return None
         else:
             return None
-
 
 client.run(token)
