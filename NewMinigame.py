@@ -38,6 +38,7 @@ def return_message(now):
         WHERE t.Time >= %s LIMIT 1;
         """
 
+        print(time_str)
         curs.execute(query, (str(time_str)))
         rows = curs.fetchall()
 

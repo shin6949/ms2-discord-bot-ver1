@@ -2,6 +2,7 @@ import datetime
 import time
 
 import discord
+from discord import Colour
 from discord.ext import tasks
 from konlpy.tag import Okt
 
@@ -283,8 +284,10 @@ async def on_message(message):
 
         file = discord.File(result['name'] + ".png", filename="guildimage.png")
 
+        line_color = Colour.from_rgb(result['r'], result['g'], result['b'])
+
         # 에러가 아닌 경우 제대로 받아온 것이므로 결과를 기반으로 메시지 구성
-        embed = discord.Embed(title="길드 검색 결과", description="  ", color=0x00ff56)
+        embed = discord.Embed(title="길드 검색 결과", description="  ", color=line_color)
         embed.set_thumbnail(url="attachment://guildimage.png")
         embed.add_field(name="이름", value=str(result['name']), inline=True)
         embed.add_field(name="순위", value=str(result['rank']) + "위", inline=True)
@@ -374,7 +377,9 @@ async def on_message(message):
         file = discord.File(result['nickname'] + ".png", filename="profileimage.png")
 
         # 에러가 아닌 경우 제대로 받아온 것이므로 결과를 기반으로 메시지 구성
-        embed = discord.Embed(title="캐릭터 검색 결과", description="  ", color=0x00ff56)
+        line_color = Colour.from_rgb(result['r'], result['g'], result['b'])
+
+        embed = discord.Embed(title="캐릭터 검색 결과", description="  ", color=line_color)
         embed.set_thumbnail(url="attachment://profileimage.png")
         embed.add_field(name="닉네임", value=str(result['nickname']), inline=True)
         embed.add_field(name="순위", value=str(result['rank']) + "위", inline=True)

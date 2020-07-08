@@ -1,8 +1,9 @@
 import re
 import urllib.request
-
+import cv2
 import requests
 from bs4 import BeautifulSoup
+import numpy
 
 # 별도 파일
 import Write_error_log
@@ -131,7 +132,8 @@ def get_guild_ranking_search_by_keyword(gettype, keyword):
             else:
                 result['imgurl'] = "http://s.nx.com/S2/Game/maplestory2/MAVIEW/data/character/ico_defalt.gif"
         else:
-            result['rank'] = ranking[0].find_all("img")[0]['alt']
+            result['rank'] = re.findall("\d+", ranking[0].find_all("img")[0]['alt'])[0]
+
             try:
                 result['imgurl'] = html.find_all("img")[1]['src']
             except:
@@ -145,6 +147,20 @@ def get_guild_ranking_search_by_keyword(gettype, keyword):
         result['trop'] = ranking[0].find_all("td")[3].get_text()
 
         urllib.request.urlretrieve(result['imgurl'], result['name'] + ".png")
+
+        # 파일 이름이 한글인 경우, openCV에서 읽을 수 없음.
+        stream = open((result['name'] + ".png").encode("utf-8"), "rb")
+        bytes = bytearray(stream.read())
+        numpyArray = numpy.asarray(bytes, dtype=numpy.uint8)
+
+        myimg = cv2.imdecode(numpyArray, cv2.IMREAD_UNCHANGED)
+
+        avg_color_per_row = numpy.average(myimg, axis=0)
+        avg_color = numpy.average(avg_color_per_row, axis=0)
+
+        result['r'] = int(avg_color[0])
+        result['g'] = int(avg_color[1])
+        result['b'] = int(avg_color[2])
 
         return result
 
@@ -249,6 +265,20 @@ def get_person_ranking_search_by_keyword(gettype, keyword):
                 result['imgurl'] = "http://s.nx.com/S2/Game/maplestory2/MAVIEW/data/character/ico_defalt.gif"
 
         urllib.request.urlretrieve(result['imgurl'], result['nickname'] + ".png")
+
+        # 파일 이름이 한글인 경우, openCV에서 읽을 수 없음.
+        stream = open((result['nickname'] + ".png").encode("utf-8"), "rb")
+        bytes = bytearray(stream.read())
+        numpyArray = numpy.asarray(bytes, dtype=numpy.uint8)
+
+        myimg = cv2.imdecode(numpyArray, cv2.IMREAD_UNCHANGED)
+
+        avg_color_per_row = numpy.average(myimg, axis=0)
+        avg_color = numpy.average(avg_color_per_row, axis=0)
+
+        result['r'] = int(avg_color[0])
+        result['g'] = int(avg_color[1])
+        result['b'] = int(avg_color[2])
 
         return result
 
