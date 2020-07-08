@@ -4,6 +4,7 @@ from pprint import pprint
 
 import discord
 import schedule
+from discord import Colour
 from konlpy.tag import Okt
 
 # 별도 파일
@@ -292,9 +293,10 @@ class chatbot(discord.Client):
                 return None
 
             file = discord.File(result['name'] + ".png", filename="guildimage.png")
+            line_color = Colour.from_rgb(result['r'], result['g'], result['b'])
 
             # 에러가 아닌 경우 제대로 받아온 것이므로 결과를 기반으로 메시지 구성
-            embed = discord.Embed(title="길드 검색 결과", description="  ", color=0x00ff56)
+            embed = discord.Embed(title="길드 검색 결과", description="  ", color=line_color)
             embed.set_thumbnail(url="attachment://guildimage.png")
             embed.add_field(name="이름", value=str(result['name']), inline=True)
             embed.add_field(name="순위", value=str(result['rank']) + "위", inline=True)
@@ -381,9 +383,10 @@ class chatbot(discord.Client):
                 return None
 
             file = discord.File(result['nickname'] + ".png", filename="profileimage.png")
+            line_color = Colour.from_rgb(result['r'], result['g'], result['b'])
 
             # 에러가 아닌 경우 제대로 받아온 것이므로 결과를 기반으로 메시지 구성
-            embed = discord.Embed(title="캐릭터 검색 결과", description="  ", color=0x00ff56)
+            embed = discord.Embed(title="캐릭터 검색 결과", description="  ", color=line_color)
             embed.set_thumbnail(url="attachment://profileimage.png")
             embed.add_field(name="닉네임", value=str(result['nickname']), inline=True)
             embed.add_field(name="순위", value=str(result['rank']) + "위", inline=True)
@@ -453,8 +456,8 @@ if __name__ == "__main__":
 
     # BOT Token
     # Main Token = "{DISCORD_BOT_TOKEN}"
-    # token = "{DISCORD_BOT_TOKEN}"
+    token = "{DISCORD_BOT_TOKEN}"
 
     # Dev Token = "{DISCORD_BOT_TOKEN}"
-    token = "{DISCORD_BOT_TOKEN}"
+    # token = "{DISCORD_BOT_TOKEN}"
     client.run(token)

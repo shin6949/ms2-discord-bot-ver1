@@ -132,6 +132,7 @@ def get_guild_ranking_search_by_keyword(gettype, keyword):
             else:
                 result['imgurl'] = "http://s.nx.com/S2/Game/maplestory2/MAVIEW/data/character/ico_defalt.gif"
         else:
+            # 순위 -> 1, 2, 3위는 "위"라는 글자까지 저장되므로 숫자만 추출함.
             result['rank'] = re.findall("\d+", ranking[0].find_all("img")[0]['alt'])[0]
 
             try:
@@ -148,24 +149,31 @@ def get_guild_ranking_search_by_keyword(gettype, keyword):
 
         urllib.request.urlretrieve(result['imgurl'], result['name'] + ".png")
 
-        # 파일 이름이 한글인 경우, openCV에서 읽을 수 없음.
-        stream = open((result['name'] + ".png").encode("utf-8"), "rb")
-        bytes = bytearray(stream.read())
-        numpyArray = numpy.asarray(bytes, dtype=numpy.uint8)
+        # 이미지가 있는 경우에만 분석 진행
+        try:
+            # 파일 이름이 한글인 경우, openCV에서 읽을 수 없음.
+            stream = open((result['name'] + ".png").encode("utf-8"), "rb")
+            bytes = bytearray(stream.read())
+            numpyArray = numpy.asarray(bytes, dtype=numpy.uint8)
 
-        myimg = cv2.imdecode(numpyArray, cv2.IMREAD_UNCHANGED)
+            myimg = cv2.imdecode(numpyArray, cv2.IMREAD_UNCHANGED)
 
-        avg_color_per_row = numpy.average(myimg, axis=0)
-        avg_color = numpy.average(avg_color_per_row, axis=0)
+            avg_color_per_row = numpy.average(myimg, axis=0)
+            avg_color = numpy.average(avg_color_per_row, axis=0)
 
-        result['r'] = int(avg_color[0])
-        result['g'] = int(avg_color[1])
-        result['b'] = int(avg_color[2])
+            result['r'] = int(avg_color[0])
+            result['g'] = int(avg_color[1])
+            result['b'] = int(avg_color[2])
+        except:
+            result['r'] = int(255)
+            result['g'] = int(255)
+            result['b'] = int(255)
 
         return result
 
     # 찾는 길드가 없는 경우 IndexError가 발생
-    except IndexError:
+    except IndexError as e:
+        print(e)
         return {'status': 'error', 'msg': "찾는 길드는 없는 길드 입니다."}
 
     # 기타 에러인 경우, 서버 또는 코드 문제임
@@ -266,19 +274,25 @@ def get_person_ranking_search_by_keyword(gettype, keyword):
 
         urllib.request.urlretrieve(result['imgurl'], result['nickname'] + ".png")
 
-        # 파일 이름이 한글인 경우, openCV에서 읽을 수 없음.
-        stream = open((result['nickname'] + ".png").encode("utf-8"), "rb")
-        bytes = bytearray(stream.read())
-        numpyArray = numpy.asarray(bytes, dtype=numpy.uint8)
+        # 이미지가 있는 경우에만 분석 진행
+        try:
+            # 파일 이름이 한글인 경우, openCV에서 읽을 수 없음.
+            stream = open((result['nickname'] + ".png").encode("utf-8"), "rb")
+            bytes = bytearray(stream.read())
+            numpyArray = numpy.asarray(bytes, dtype=numpy.uint8)
 
-        myimg = cv2.imdecode(numpyArray, cv2.IMREAD_UNCHANGED)
+            myimg = cv2.imdecode(numpyArray, cv2.IMREAD_UNCHANGED)
 
-        avg_color_per_row = numpy.average(myimg, axis=0)
-        avg_color = numpy.average(avg_color_per_row, axis=0)
+            avg_color_per_row = numpy.average(myimg, axis=0)
+            avg_color = numpy.average(avg_color_per_row, axis=0)
 
-        result['r'] = int(avg_color[0])
-        result['g'] = int(avg_color[1])
-        result['b'] = int(avg_color[2])
+            result['r'] = int(avg_color[0])
+            result['g'] = int(avg_color[1])
+            result['b'] = int(avg_color[2])
+        except:
+            result['r'] = int(255)
+            result['g'] = int(255)
+            result['b'] = int(255)
 
         return result
 

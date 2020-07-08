@@ -164,6 +164,26 @@ async def on_message(message):
         public_query.log_upload(message, "ox", msg, str(time.time() - start))
         return None
 
+    if message.content.startswith('!ㅋ ') or message.content.startswith('!q '):
+        channel = message.channel
+
+        # 허용된 서버에서 사용하는지 확인
+        try:
+            if (not str(message.guild.id) == "{DISCORD_SERVER_ID}") and (not str(message.guild.id) == "{DISCORD_SERVER_ID}"):
+                return None
+        # DM인 경우
+        except AttributeError:
+            return None
+
+        # 형태소 분석기 로드
+        nlpy = Okt()
+
+        msg = OX_Quiz_Result.get(message, "Public", nlpy)
+        msg = Offer_Process_Time.configure(start, msg, message)
+        await channel.send(msg)
+        public_query.log_upload(message, "ox", msg, str(time.time() - start))
+        return None
+
     # 필보 검색
     if message.content.startswith("!필보"):
         if publicJudgeBan.judge(message):
@@ -217,9 +237,7 @@ async def on_message(message):
 
         # 허용된 서버에서 사용하는지 확인
         try:
-            if (not str(message.guild.id) == "{DISCORD_SERVER_ID}") and (
-            not str(message.guild.id) == "{DISCORD_SERVER_ID}"):
-                print("지정된 서버가 아님.")
+            if (not str(message.guild.id) == "{DISCORD_SERVER_ID}") and (not str(message.guild.id) == "{DISCORD_SERVER_ID}"):
                 return None
         # DM인 경우
         except AttributeError:
@@ -257,9 +275,7 @@ async def on_message(message):
 
         # 허용된 서버에서 사용하는지 확인
         try:
-            if (not str(message.guild.id) == "{DISCORD_SERVER_ID}") and (
-            not str(message.guild.id) == "{DISCORD_SERVER_ID}"):
-                print("지정된 서버가 아님.")
+            if (not str(message.guild.id) == "{DISCORD_SERVER_ID}") and (not str(message.guild.id) == "{DISCORD_SERVER_ID}"):
                 return None
         # DM인 경우
         except AttributeError:
@@ -310,7 +326,6 @@ async def on_message(message):
         # 허용된 서버에서 사용하는지 확인
         try:
             if not str(message.guild.id) == "{DISCORD_SERVER_ID}" or not str(message.guild.id) == "{DISCORD_SERVER_ID}":
-                print("지정된 서버가 아님.")
                 return None
         # DM인 경우
         except AttributeError:
@@ -348,9 +363,7 @@ async def on_message(message):
 
         # 허용된 서버에서 사용하는지 확인
         try:
-            if (not str(message.guild.id) == "{DISCORD_SERVER_ID}") and (
-            not str(message.guild.id) == "{DISCORD_SERVER_ID}"):
-                print("지정된 서버가 아님.")
+            if (not str(message.guild.id) == "{DISCORD_SERVER_ID}") and (not str(message.guild.id) == "{DISCORD_SERVER_ID}"):
                 return None
         # DM인 경우
         except AttributeError:
