@@ -27,7 +27,7 @@ token = "{DISCORD_BOT_TOKEN}"
 
 
 # Dev Token
-token = "{DISCORD_BOT_TOKEN}"
+# token = "{DISCORD_BOT_TOKEN}"
 
 
 # Bot initialize
@@ -180,7 +180,7 @@ async def on_message(message):
 
         msg = OX_Quiz_Result.get(message, "Public", nlpy)
         msg = Offer_Process_Time.configure(start, msg, message)
-        await channel.send(msg)
+        await channel.send(msg, delete_after=60.0)
         public_query.log_upload(message, "ox", msg, str(time.time() - start))
         return None
 
@@ -380,7 +380,7 @@ async def on_message(message):
             result = get_ranking.get_person_ranking_search_by_keyword("None",
                                                                       message.content.replace("!개트종 ", "", 1))
 
-        # 에러가 발생한 경우
+        # 서버 에러가 발생한 경우
         if str(result['status']) == "error":
             result['msg'] = Offer_Process_Time.configure(start, result['msg'], message)
             await channel.send(result['msg'])

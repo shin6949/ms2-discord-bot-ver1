@@ -1,9 +1,10 @@
 import re
 import urllib.request
+
 import cv2
+import numpy
 import requests
 from bs4 import BeautifulSoup
-import numpy
 
 # 별도 파일
 import Write_error_log
@@ -297,7 +298,7 @@ def get_person_ranking_search_by_keyword(gettype, keyword):
         return result
 
     except IndexError:
-        return {'status': 'IndexError', 'msg': "찾는 캐릭터는 없는 캐릭터 입니다."}
+        return {'status': 'error', 'msg': "찾는 캐릭터는 없는 캐릭터 입니다."}
 
     except Exception as e:
         Write_error_log.write_log(return_location(), str(e))
