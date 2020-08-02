@@ -25,9 +25,11 @@ client = discord.Client()
 # Main Token = "{DISCORD_BOT_TOKEN}"
 token = "{DISCORD_BOT_TOKEN}"
 
-
 # Dev Token
 # token = "{DISCORD_BOT_TOKEN}"
+
+global msg_array
+msg_array = []
 
 
 # Bot initialize
@@ -436,5 +438,28 @@ async def on_message(message):
             return None
         else:
             return None
+
+    # 님드라 군인 귀여움 받아치기
+    if message.guild.id == {DISCORD_SERVER_ID} or message.guild.id == {DISCORD_SERVER_ID}:
+        global msg_array
+
+        if (message.content.startswith("님드")) or (message.content.startswith("님들")) or message.content == "여러분":
+            data_set = {'time': time.time(), 'msg': message.content, 'author': message.author.id}
+            msg_array.append(data_set)
+            return None
+
+        if ("구닌" in message.content or "군인" in message.content) and len(msg_array) > 0:
+            for i in msg_array:
+                if (i['author'] == message.author.id) and (time.time() - i['time'] <= 10):
+                    await message.channel.send("안 귀여움")
+                    # 클리어
+                    msg_array = []
+                    return None
+
+        # 시간이 지난 항목들 삭제
+        for i in range(0, len(msg_array)):
+            if time.time() - msg_array[i]['time'] > 10:
+                del msg_array[i]
+                return None
 
 client.run(token)
