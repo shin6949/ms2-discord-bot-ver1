@@ -177,13 +177,13 @@ class BadUser:
 
         for i in find_boss:
             if i['id'] <= 4:
-                url = "http://maplestory2.nexon.com/Rank/Boss3?b={}&k={}".format(i['boss_id'], self.__nickname)
+                url = "http://maplestory2.nexon.com/Rank/Boss3?b={}&k={}".format(i['boss_id'], self.nickname())
                 html = BeautifulSoup(requests.get(url).text, 'html.parser') \
                     .select(
                     "#ranking_page > div.board_list4.rank_list_boss3 > div.board > table > tbody > tr > td.record")
 
                 try:
-                    record = {"boss_name": i['boss_name'], "boss_level": i['boss_level'], "record": int(html[0].text)}
+                    record = {"boss_name": i['boss_name'], "boss_level": i['boss_level'], "record": html[0].text}
                     records.append(record)
 
                 except:
