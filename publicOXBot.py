@@ -6,6 +6,7 @@ from discord import Colour
 from discord.ext import tasks
 from konlpy.tag import Okt
 
+import Baduser
 # 별도 파일들
 import Calculator
 import NewMinigame as Mini
@@ -418,6 +419,83 @@ async def on_message(message):
 
         return None
 
+    if message.content.startswith("/등록 "):
+        if str(message.guild.id) == "{DISCORD_SERVER_ID}" or str(message.guild.id) == "{DISCORD_SERVER_ID}":
+            query_list = message.content.replace("/등록 ", "", 1).split()
+            try:
+                user = Baduser.BadUser(nickname=query_list[0],
+                                       reason=message.content.replace("/등록 {} ".format(query_list[0]), "", 1).strip(),
+                                       requested_user=message.author.name, requested_user_id=message.author.id)
+
+                try:
+                    user.add_to_db()
+                    result = user.get_add_result_text()
+                    await channel.send(result['text'], embed=result['embed'])
+
+                except Exception as e:
+                    if str(e) == "DB Error":
+                        await channel.send("내부 서버 문제로 인해 등록하지 못 했습니다.")
+                    elif str(e) == "WEB Error":
+                        await channel.send("넥슨 서버 문제로 인해 등록하지 못 했습니다.")
+                    elif str(e) == "No User":
+                        await channel.send("해당 유저는 없는 유저입니다.")
+
+                    return None
+
+            except Exception as e:
+                if str(e) == "DB Error":
+                    await channel.send("내부 서버 문제로 인해 등록하지 못 했습니다.")
+                elif str(e) == "WEB Error":
+                    await channel.send("넥슨 서버 문제로 인해 등록하지 못 했습니다.")
+                elif str(e) == "No User":
+                    await channel.send("해당 유저는 없는 유저입니다.")
+
+                return None
+
+    if message.content.startswith("/검색 "):
+        if str(message.guild.id) == "{DISCORD_SERVER_ID}" or str(message.guild.id) == "{DISCORD_SERVER_ID}":
+            query_list = message.content.replace("/검색 ", "", 1).split()
+            try:
+                user = Baduser.BadUser(nickname=query_list[0].strip(), reason=None,
+                                       requested_user=message.author.name, requested_user_id=message.author.id)
+
+                try:
+                    result = user.get_info()
+
+                    if result['status']:
+                        await channel.send(result['text'], embed=result['embed'])
+                        await channel.send(result['records'])
+                        return None
+                    else:
+                        await channel.send(result['text'])
+                        return None
+
+                except Exception as e:
+                    if e == "DB Error":
+                        await channel.send("내부 서버 문제로 인해 등록하지 못 했습니다.")
+                    elif e == "WEB Error":
+                        await channel.send("넥슨 서버 문제로 인해 등록하지 못 했습니다.")
+                    else:
+                        print(e)
+
+                    return None
+
+            except Exception as e:
+                if e == "DB Error":
+                    await channel.send("내부 서버 문제로 인해 등록하지 못 했습니다.")
+                elif e == "WEB Error":
+                    await channel.send("넥슨 서버 문제로 인해 등록하지 못 했습니다.")
+                else:
+                    print(e)
+
+                return None
+
+    if message.content == "/모두":
+        if str(message.guild.id) == "{DISCORD_SERVER_ID}" or str(message.guild.id) == "{DISCORD_SERVER_ID}":
+            result = Baduser.get_all_user(message.author)
+            await channel.send(result['message'])
+            return None
+
     # 커스텀 메시지
     if message.content.startswith("!"):
         if publicJudgeBan.judge(message):
@@ -443,12 +521,27 @@ async def on_message(message):
     if message.guild.id == {DISCORD_SERVER_ID} or message.guild.id == {DISCORD_SERVER_ID}:
         global msg_array
 
-        if (message.content.startswith("님드")) or (message.content.startswith("님들")) or message.content == "여러분":
+        if (message.content.startswith("님드") or message.content.startswith(
+                "님들") or message.content == "여러분" or message.content == "ㄴㄷㄹ" or message.content == "ㄴㄷㅇ"):
+            if "구닌" in message.content or "군인" in message.content or "ㄱㅇ" in message.content or "ㄱㄴ":
+                await message.channel.send("안 귀여움")
+                return None
+
+        if "기여움" in message.content or "귀여움" in message.content or "코코블루" in message.content or "ㄱㅇㅇ" in message.content:
+            if len(msg_array) == 0:
+                data_set = {'time': time.time(), 'msg': message.content, 'author': message.author.id}
+                msg_array.append(data_set)
+                return None
+
+        if (message.content.startswith("님드")) or (message.content.startswith(
+                "님들")) or message.content == "여러분" or message.content == "ㄴㄷㄹ" or message.content == "ㄴㄷㅇ":
             data_set = {'time': time.time(), 'msg': message.content, 'author': message.author.id}
             msg_array.append(data_set)
             return None
 
-        if ("구닌" in message.content or "군인" in message.content) and len(msg_array) > 0:
+        if (
+                "구닌" in message.content or "군인" in message.content or "ㄱㅇ" in message.content or "ㄱㄴ" in message.content) and len(
+                msg_array) > 0:
             for i in msg_array:
                 if (i['author'] == message.author.id) and (time.time() - i['time'] <= 10):
                     await message.channel.send("안 귀여움")
