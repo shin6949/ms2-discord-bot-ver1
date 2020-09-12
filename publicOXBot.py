@@ -442,6 +442,9 @@ async def on_message(message):
 
                     return None
 
+                finally:
+                    user.__del__()
+
             except Exception as e:
                 if str(e) == "DB Error":
                     await channel.send("내부 서버 문제로 인해 등록하지 못 했습니다.")
@@ -479,6 +482,9 @@ async def on_message(message):
                         print(e)
 
                     return None
+
+                finally:
+                    user.__del__()
 
             except Exception as e:
                 if e == "DB Error":

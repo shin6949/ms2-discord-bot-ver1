@@ -52,9 +52,8 @@ class Report:
 
 # 차단 유저의 정보를 담는 클래스
 class BadUser:
-    __report_list = []
-
     def __init__(self, **kwargs):
+        self.__report_list = []
         self.__nickname_id = None
 
         if kwargs['nickname'] is None:
@@ -88,6 +87,14 @@ class BadUser:
             count += 1
 
         return result
+
+    def __del__(self):
+        self.__nickname_id = None
+        self.__job = None
+        self.__report_list = None
+        self.__nickname = None
+        self.__requested_user_id = None
+        self.__request_user = None
 
     def nickname(self):
         return self.__nickname
