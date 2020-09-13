@@ -45,8 +45,8 @@ class Report:
 
         # REPORT 정보 INSERT
         curs = conn.cursor()
-        query = "INSERT INTO report(nick_value, reason, add_user, add_time) values (%s, %s, %s, now())"
-        curs.execute(query, (self.__nickname_id, self.__reason, self.__add_user))
+        query = "INSERT INTO report(nick_value, reason, add_user, add_user_id, add_time) values (%s, %s, %s, %s, now())"
+        curs.execute(query, (self.__nickname_id, self.__reason, self.__add_user, self.__add_user_id))
         conn.commit()
         conn.close()
 
@@ -98,7 +98,8 @@ class BadUser:
         self.__nickname = None
         self.__requested_user_id = None
         self.__request_user = None
-        self.__conn.close()
+        if self.__conn.open:
+            self.__conn.close()
 
     def nickname(self):
         return self.__nickname
@@ -338,7 +339,7 @@ class BadUser:
             raise Exception("DB Error")
 
     def get_add_result_text(self):
-        result_text = "<@{}>님의 요청을 성공적으로 등록되었습니다.".format(self.__requested_user_id)
+        result_text = "<@{}>님의 요청을 등록하였습니다.".format(self.__requested_user_id)
         embed = discord.Embed(title="캐릭터 등록 정보", description="  ", color=0xff0000)
         embed.add_field(name="닉네임", value=self.nickname(), inline=True)
         embed.add_field(name="직업", value=self.job(), inline=True)
@@ -349,7 +350,7 @@ class BadUser:
     def get_info(self):
         # 등록되어 있지 않다면
         if not self.__get_reports():
-            return {"status": False, "text": "검색하신 캐릭터는 존재하지 않습니다."}
+            return {"status": False, "text": "검색하신 캐릭터는 레이드 클리어 기록이 없거나 없는 유저로 판단됩니다."}
 
         # 등록되어 있다면
         embed = discord.Embed(title="캐릭터 등록 정보", description="  ", color=0xff0000)
