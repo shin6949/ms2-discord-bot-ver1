@@ -19,6 +19,7 @@ class Report:
         self.__add_time = None if kwargs['add_time'] is None else kwargs['add_time']
         self.__add_user = None if kwargs['add_user'] is None else kwargs['add_user']
         self.__add_user_id = None if kwargs['add_user_id'] is None else kwargs['add_user_id']
+        self.__conn = None if kwargs['conn'] is None else kwargs['conn']
 
     def set_nickname_id(self, id):
         self.__nickname_id = id
@@ -41,14 +42,10 @@ class Report:
 
     def add_to_db(self):
         # REPORT 정보 INSERT
-        conn = public_SQL.bless_connection()
-
-        # REPORT 정보 INSERT
-        curs = conn.cursor()
+        curs = self.__conn.cursor()
         query = "INSERT INTO report(nick_value, reason, add_user, add_user_id, add_time) values (%s, %s, %s, %s, now())"
         curs.execute(query, (self.__nickname_id, self.__reason, self.__add_user, self.__add_user_id))
-        conn.commit()
-        conn.close()
+        self.__conn.commit()
 
 
 # 차단 유저의 정보를 담는 클래스
@@ -77,7 +74,7 @@ class BadUser:
 
         if kwargs['reason'] is not None:
             tmp_report = Report(reason=kwargs['reason'], nickname_id=None, add_time=None,
-                                add_user=self.__request_user, add_user_id=kwargs['requested_user_id'])
+                                add_user=self.__request_user, add_user_id=kwargs['requested_user_id'], conn=self.__conn)
             self.__report_list.append(tmp_report)
 
     def __str__(self):
@@ -316,7 +313,7 @@ class BadUser:
             for i in rows:
                 self.__report_list.append(
                     Report(nickname_id=i['nick_value'], reason=i['reason'], add_user=i['add_user'],
-                           add_time=i['add_time'], add_user_id=i['add_user_id']))
+                           add_time=i['add_time'], add_user_id=i['add_user_id'], conn=self.__conn))
 
             return True
 
@@ -326,26 +323,30 @@ class BadUser:
 
     def __get_report_num(self):
         try:
-            # 유저가 있는지 찾기
             curs = self.__conn.cursor(pymysql.cursors.DictCursor)
             query = "SELECT count(*) as count FROM report WHERE nick_value = %s GROUP BY nick_value"
             curs.execute(query, (self.__get_nickname_id()))
             rows = curs.fetchall()
 
-            return rows[0]['count']
+            return int(rows[0]['count'])
 
         except Exception as e:
             Write_error_log.write_log(return_location(), str(e))
             raise Exception("DB Error")
 
     def get_add_result_text(self):
-        result_text = "<@{}>님의 요청을 등록하였습니다.".format(self.__requested_user_id)
-        embed = discord.Embed(title="캐릭터 등록 정보", description="  ", color=0xff0000)
-        embed.add_field(name="닉네임", value=self.nickname(), inline=True)
-        embed.add_field(name="직업", value=self.job(), inline=True)
-        embed.add_field(name="누적 리포트 수", value=str(self.__get_report_num()) + "개", inline=True)
+        try:
+            result_text = "<@{}>님의 요청을 등록하였습니다.".format(self.__requested_user_id)
+            embed = discord.Embed(title="캐릭터 등록 정보", description="  ", color=0xff0000)
+            embed.add_field(name="닉네임", value=self.nickname(), inline=True)
+            embed.add_field(name="직업", value=self.job(), inline=True)
+            embed.add_field(name="누적 리포트 수", value=str(self.__get_report_num()) + "개", inline=True)
 
-        return {"text": result_text, "embed": embed}
+            return {"text": result_text, "embed": embed}
+
+        except Exception as e:
+            Write_error_log.write_log(return_location(), str(e))
+            print(e)
 
     def get_info(self):
         # 등록되어 있지 않다면
