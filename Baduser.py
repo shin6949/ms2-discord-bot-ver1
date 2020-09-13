@@ -18,6 +18,7 @@ class Report:
         self.__reason = None if kwargs['reason'] is None else kwargs['reason']
         self.__add_time = None if kwargs['add_time'] is None else kwargs['add_time']
         self.__add_user = None if kwargs['add_user'] is None else kwargs['add_user']
+        self.__add_user_id = None if kwargs['add_user_id'] is None else kwargs['add_user_id']
 
     def set_nickname_id(self, id):
         self.__nickname_id = id
@@ -53,6 +54,7 @@ class Report:
 # 차단 유저의 정보를 담는 클래스
 class BadUser:
     def __init__(self, **kwargs):
+        self.__conn = public_SQL.bless_connection()
         self.__report_list = []
         self.__nickname_id = None
 
@@ -74,7 +76,8 @@ class BadUser:
         self.__load_user_imf()
 
         if kwargs['reason'] is not None:
-            tmp_report = Report(reason=kwargs['reason'], nickname_id=None, add_time=None, add_user=self.__request_user)
+            tmp_report = Report(reason=kwargs['reason'], nickname_id=None, add_time=None,
+                                add_user=self.__request_user, add_user_id=kwargs['requested_user_id'])
             self.__report_list.append(tmp_report)
 
     def __str__(self):
@@ -95,6 +98,7 @@ class BadUser:
         self.__nickname = None
         self.__requested_user_id = None
         self.__request_user = None
+        self.__conn.close()
 
     def nickname(self):
         return self.__nickname
@@ -134,12 +138,10 @@ class BadUser:
 
     # DB에 등록된 보스 id, 이름을 받아오는 함수
     def __get_boss_list(self):
-        conn = public_SQL.bless_connection()
-        curs = conn.cursor(pymysql.cursors.DictCursor)
+        curs = self.__conn.cursor(pymysql.cursors.DictCursor)
         query = "SELECT id, boss_id, boss_name, boss_level FROM boss_value ORDER BY id ASC"
         curs.execute(query)
         rows = curs.fetchall()
-        conn.close()
 
         return rows
 
@@ -166,7 +168,7 @@ class BadUser:
         elif src == "http://s.nx.com/S2/Game/maplestory2/MAVIEW/ranking/ico_heavygunner.png":
             return "헤비거너"
         elif src == "http://s.nx.com/S2/Game/maplestory2/MAVIEW/ranking/ico_runeblader.png":
-            return "룬블레이더"
+            return "룬 블레이더"
         else:
             return "초보자"
 
@@ -196,18 +198,14 @@ class BadUser:
         result = ""
 
         try:
-            conn = public_SQL.bless_connection()
-
             # 등록된 USER ID 받아오기
-            curs = conn.cursor(pymysql.cursors.DictCursor)
+            curs = self.__conn.cursor(pymysql.cursors.DictCursor)
             query = "SELECT id FROM user WHERE nickname = %s"
             curs.execute(query, (self.nickname()))
             rows = curs.fetchall()
 
             self.__nickname_id = rows[0]['id']
             result = rows[0]['id']
-
-            conn.close()
 
         except Exception as e:
             Write_error_log.write_log(return_location(), str(e))
@@ -216,28 +214,26 @@ class BadUser:
 
     # DB에 추가하는 함수
     def add_to_db(self):
-        conn = public_SQL.bless_connection()
-
         try:
             # 이미 등록된 사람인지 확인
-            curs = conn.cursor(pymysql.cursors.DictCursor)
+            curs = self.__conn.cursor(pymysql.cursors.DictCursor)
             query = "SELECT nickname FROM user WHERE nickname = %s"
             curs.execute(query, self.nickname())
 
             # 등록된 사람이 아니라면...
             if len(curs.fetchall()) == 0:
                 # 직업 값 받아오기
-                curs = conn.cursor(pymysql.cursors.DictCursor)
+                curs = self.__conn.cursor(pymysql.cursors.DictCursor)
                 query = "SELECT id, name FROM job_value WHERE name = %s"
                 curs.execute(query, self.job())
                 rows = curs.fetchall()
 
                 try:
                     # user 정보 insert
-                    curs = conn.cursor(pymysql.cursors.DictCursor)
+                    curs = self.__conn.cursor(pymysql.cursors.DictCursor)
                     query = "INSERT INTO user(nickname, job, add_time) values (%s, %s,now())"
                     curs.execute(query, (self.nickname(), rows[0]['id']))
-                    conn.commit()
+                    self.__conn.commit()
 
                 except Exception as e:
                     Write_error_log.write_log(return_location(), str(e))
@@ -255,23 +251,18 @@ class BadUser:
             Write_error_log.write_log(return_location(), str(e))
             raise Exception("DB Error")
 
-        finally:
-            conn.close()
-
     # DB에서 유저 정보를 불러옴
     def __load_user_imf(self):
         try:
-            conn = public_SQL.bless_connection()
-
             # USER ID 받아오기
-            curs = conn.cursor(pymysql.cursors.DictCursor)
+            curs = self.__conn.cursor(pymysql.cursors.DictCursor)
             query = "SELECT id FROM user WHERE nickname = %s"
             curs.execute(query, (self.nickname()))
             rows = curs.fetchall()
 
             # USER 정보가 있을 경우
             if len(rows) > 0:
-                curs = conn.cursor(pymysql.cursors.DictCursor)
+                curs = self.__conn.cursor(pymysql.cursors.DictCursor)
                 query = "SELECT u.id as nickname_id, j.name as job FROM user as u join job_value as j on u.job = j.id WHERE u.nickname = %s"
                 curs.execute(query, (self.nickname()))
                 rows = curs.fetchall()
@@ -301,15 +292,10 @@ class BadUser:
             else:
                 raise Exception("DB Error")
 
-        finally:
-            conn.close()
-
     def __get_reports(self):
         try:
-            conn = public_SQL.bless_connection()
-
             # 유저가 있는지 찾기
-            curs = conn.cursor(pymysql.cursors.DictCursor)
+            curs = self.__conn.cursor(pymysql.cursors.DictCursor)
             query = "SELECT id FROM user WHERE nickname = %s"
             curs.execute(query, self.nickname())
             rows = curs.fetchall()
@@ -319,8 +305,8 @@ class BadUser:
                 return False
 
             # 유저가 있다면, report 수집
-            curs = conn.cursor(pymysql.cursors.DictCursor)
-            query = "SELECT nick_value, reason, add_user, add_time FROM report WHERE nick_value = %s ORDER BY add_time DESC LIMIT 3"
+            curs = self.__conn.cursor(pymysql.cursors.DictCursor)
+            query = "SELECT nick_value, reason, add_user, add_user_id, add_time FROM report WHERE nick_value = %s ORDER BY add_time DESC LIMIT 3"
             curs.execute(query, rows[0]['id'])
             rows = curs.fetchall()
 
@@ -329,7 +315,7 @@ class BadUser:
             for i in rows:
                 self.__report_list.append(
                     Report(nickname_id=i['nick_value'], reason=i['reason'], add_user=i['add_user'],
-                           add_time=i['add_time']))
+                           add_time=i['add_time'], add_user_id=i['add_user_id']))
 
             return True
 
@@ -337,14 +323,10 @@ class BadUser:
             Write_error_log.write_log(return_location(), str(e))
             raise Exception("DB Error")
 
-        finally:
-            conn.close()
-
     def __get_report_num(self):
         try:
-            conn = public_SQL.bless_connection()
             # 유저가 있는지 찾기
-            curs = conn.cursor(pymysql.cursors.DictCursor)
+            curs = self.__conn.cursor(pymysql.cursors.DictCursor)
             query = "SELECT count(*) as count FROM report WHERE nick_value = %s GROUP BY nick_value"
             curs.execute(query, (self.__get_nickname_id()))
             rows = curs.fetchall()
@@ -354,9 +336,6 @@ class BadUser:
         except Exception as e:
             Write_error_log.write_log(return_location(), str(e))
             raise Exception("DB Error")
-
-        finally:
-            conn.close()
 
     def get_add_result_text(self):
         result_text = "<@{}>님의 요청을 성공적으로 등록되었습니다.".format(self.__requested_user_id)
@@ -379,7 +358,6 @@ class BadUser:
         embed.add_field(name="리포트 수", value=str(self.__get_report_num()) + "개", inline=True)
 
         records_text = "최근 3건의 내역을 표시합니다."
-        print(len(self.__report_list))
 
         for i in self.__report_list:
             records_text += i.__str__()
@@ -394,11 +372,17 @@ class BadUser:
                 "embed": embed, "records": records_text}
 
 
-def get_all_user(author):
+def get_all_user():
     try:
         conn = public_SQL.bless_connection()
         curs = conn.cursor(pymysql.cursors.DictCursor)
-        query = "SELECT nickname FROM user"
+        query = "SELECT u.nickname as nickname, JOB.name as job, count(*) as count " \
+                "FROM report as r " \
+                "JOIN user as u ON r.nick_value = u.id " \
+                "JOIN (SELECT id, name FROM job_value)JOB ON u.job = JOB.id " \
+                "GROUP BY nick_value " \
+                "ORDER BY count(*) DESC " \
+                "LIMIT 30"
         curs.execute(query)
         rows = curs.fetchall()
         conn.close()
@@ -406,11 +390,9 @@ def get_all_user(author):
         if len(rows) == 0:
             return {"status": False, "message": "검색 결과가 없습니다."}
 
-        result = "닉네임 / 직업 / 리포트 수```"
+        result = "리포트 많은 30명을 표시합니다.\n닉네임 / 직업 / 리포트 수```"
         for i in rows:
-            tmp_user = BadUser(nickname=i['nickname'], reason=None, requested_user=author.name,
-                               requested_user_id=author.id)
-            result += "{} / {} / {}회\n".format(tmp_user.nickname(), tmp_user.job(), tmp_user.report_num())
+            result += "{} / {} / {}회\n".format(i['nickname'], i['job'], i['count'])
 
         result += "```"
 

@@ -498,7 +498,7 @@ async def on_message(message):
 
     if message.content == "/모두":
         if str(message.guild.id) == "{DISCORD_SERVER_ID}" or str(message.guild.id) == "{DISCORD_SERVER_ID}":
-            result = Baduser.get_all_user(message.author)
+            result = Baduser.get_all_user()
             await channel.send(result['message'])
             return None
 
