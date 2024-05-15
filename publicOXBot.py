@@ -523,42 +523,4 @@ async def on_message(message):
         else:
             return None
 
-    # 님드라 군인 귀여움 받아치기
-    if message.guild.id == {DISCORD_SERVER_ID} or message.guild.id == {DISCORD_SERVER_ID}:
-        global msg_array
-
-        if (message.content.startswith("님드") or message.content.startswith(
-                "님들") or message.content == "여러분" or message.content == "ㄴㄷㄹ" or message.content == "ㄴㄷㅇ"):
-            if "구닌" in message.content or "군인" in message.content or "ㄱㅇ" in message.content or "ㄱㄴ":
-                await message.channel.send("안 귀여움")
-                return None
-
-        if "기여움" in message.content or "귀여움" in message.content or "코코블루" in message.content or "ㄱㅇㅇ" in message.content:
-            if len(msg_array) == 0:
-                data_set = {'time': time.time(), 'msg': message.content, 'author': message.author.id}
-                msg_array.append(data_set)
-                return None
-
-        if (message.content.startswith("님드")) or (message.content.startswith(
-                "님들")) or message.content == "여러분" or message.content == "ㄴㄷㄹ" or message.content == "ㄴㄷㅇ":
-            data_set = {'time': time.time(), 'msg': message.content, 'author': message.author.id}
-            msg_array.append(data_set)
-            return None
-
-        if (
-                "구닌" in message.content or "군인" in message.content or "ㄱㅇ" in message.content or "ㄱㄴ" in message.content) and len(
-                msg_array) > 0:
-            for i in msg_array:
-                if (i['author'] == message.author.id) and (time.time() - i['time'] <= 10):
-                    await message.channel.send("안 귀여움")
-                    # 클리어
-                    msg_array = []
-                    return None
-
-        # 시간이 지난 항목들 삭제
-        for i in range(0, len(msg_array)):
-            if time.time() - msg_array[i]['time'] > 10:
-                del msg_array[i]
-                return None
-
 client.run(token)
