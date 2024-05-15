@@ -455,8 +455,8 @@ if __name__ == "__main__":
     Write_error_log.write_log(return_location(), "Thread Start")
 
     # BOT Token
-    # Main Token = "{DISCORD_BOT_TOKEN}"
-    token = "{DISCORD_BOT_TOKEN}"
+    # Main Token = "{DISCROD_BOT_TOKEN}"
+    token = "{DISCROD_BOT_TOKEN}"
 
     # Dev Token = "{DISCORD_BOT}"
     # token = "{DISCORD_BOT}"
