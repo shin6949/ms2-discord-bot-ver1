@@ -458,6 +458,6 @@ if __name__ == "__main__":
     # Main Token = "{DISCORD_BOT_TOKEN}"
     token = "{DISCORD_BOT_TOKEN}"
 
-    # Dev Token = "{DISCORD_BOT_TOKEN}"
-    # token = "{DISCORD_BOT_TOKEN}"
+    # Dev Token = "{DISCORD_BOT}"
+    # token = "{DISCORD_BOT}"
     client.run(token)

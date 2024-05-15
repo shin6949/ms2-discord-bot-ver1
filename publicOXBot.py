@@ -23,11 +23,11 @@ import public_query
 client = discord.Client()
 
 # BOT Token
-# Main Token = "{DISCORD_BOT_TOKEN}"
-token = "{DISCORD_BOT_TOKEN}"
+# Main Token = "{DISCORD_BOT}"
+token = "{DISCORD_BOT}"
 
 # Dev Token
-# token = "{DISCORD_BOT_TOKEN}"
+# token = "{DISCORD_BOT}"
 
 global msg_array
 msg_array = []
@@ -38,7 +38,7 @@ msg_array = []
 # 처음 켰을 때 호출되는 함수
 async def on_connect():
     nlpy = Okt()
-    nlpy.nouns("옵치")
+    nlpy.nouns("테스트")
     print("nlpy Load")
 
 
